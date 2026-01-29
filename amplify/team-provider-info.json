@@ -1,0 +1,28 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-chatai-dev-e9340-authRole",
+      "UnauthRoleArn": "arn:aws:iam::338658063532:role/amplify-chatai-dev-e9340-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::338658063532:role/amplify-chatai-dev-e9340-authRole",
+      "Region": "us-west-2",
+      "DeploymentBucketName": "amplify-chatai-dev-e9340-deployment",
+      "UnauthRoleName": "amplify-chatai-dev-e9340-unauthRole",
+      "StackName": "amplify-chatai-dev-e9340",
+      "StackId": "arn:aws:cloudformation:us-west-2:338658063532:stack/amplify-chatai-dev-e9340/f57e55f0-fcab-11f0-9159-0abf776429cf",
+      "AmplifyAppId": "d1x9bofo8p40vb"
+    },
+    "categories": {
+      "auth": {
+        "chatai3408522a": {
+          "userPoolId": "us-west-2_eaUOifAaZ",
+          "userPoolName": "ImageAnalysisUserPool",
+          "webClientId": "2s6v921b0pupo64nn1l69nrsi",
+          "nativeClientId": "2s6v921b0pupo64nn1l69nrsi"
+        }
+      },
+      "api": {
+        "chatai": {}
+      }
+    }
+  }
+}

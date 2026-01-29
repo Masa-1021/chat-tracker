@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@layer reset, base, tokens, recipes, utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--sds-color-surface-default);
+}
+
+#root {
+  min-height: 100vh;
+}

@@ -1,0 +1,11 @@
+{
+  "AppSyncApiName": "chatai",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authchatai3408522a",
+      "Outputs.UserPoolId"
+    ]
+  }
+}
