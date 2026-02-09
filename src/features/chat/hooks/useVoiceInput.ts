@@ -27,10 +27,9 @@ interface SpeechRecognitionConstructor {
 }
 
 function getSpeechRecognition(): SpeechRecognitionConstructor | null {
-  const w = window as Record<string, unknown>
-  return (w.SpeechRecognition ?? w.webkitSpeechRecognition) as
-    | SpeechRecognitionConstructor
-    | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vendor-prefixed API access
+  const w = window as unknown as Record<string, SpeechRecognitionConstructor | undefined>
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null
 }
 
 export function useVoiceInput(onTranscript: (text: string) => void) {
