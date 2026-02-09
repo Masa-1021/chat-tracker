@@ -144,7 +144,7 @@ export function useCreateSession() {
   })
 }
 
-/** Send a message (calls chatHandler Lambda via AppSync) */
+/** Send a message (calls chatHandler Lambda via AppSync custom mutation) */
 export function useSendMessage() {
   const queryClient = useQueryClient()
 
@@ -160,22 +160,53 @@ export function useSendMessage() {
     }) => {
       const client = getAmplifyClient()
 
-      // Save user message via AppSync mutation
-      const userMsg = await client.models.ChatMessage.create({
+      const result = await client.mutations.sendMessage({
         sessionId,
-        role: 'USER',
         content,
         images: images ?? [],
+      })
+
+      if (!result.data) {
+        throw new Error(
+          result.errors?.[0]?.message ?? 'sendMessage returned no data',
+        )
+      }
+
+      return result.data
+    },
+    // Optimistic update: show user message immediately
+    onMutate: async (variables) => {
+      const queryKey = [...MESSAGES_KEY, variables.sessionId]
+      await queryClient.cancelQueries({ queryKey })
+      const previousMessages =
+        queryClient.getQueryData<ChatMessage[]>(queryKey)
+
+      const optimisticMessage: ChatMessage = {
+        id: `optimistic-${Date.now()}`,
+        sessionId: variables.sessionId,
+        role: 'USER',
+        content: variables.content,
+        images: variables.images ?? [],
         isStreaming: false,
         timestamp: new Date().toISOString(),
-      })
-      if (userMsg.errors) throw new Error(userMsg.errors[0].message)
+      }
 
-      return {
-        userMessage: mapMessage(userMsg.data as AmplifyMessageItem),
+      queryClient.setQueryData<ChatMessage[]>(queryKey, (old) => [
+        ...(old ?? []),
+        optimisticMessage,
+      ])
+
+      return { previousMessages }
+    },
+    onError: (_err, variables, context) => {
+      if (context?.previousMessages) {
+        queryClient.setQueryData(
+          [...MESSAGES_KEY, variables.sessionId],
+          context.previousMessages,
+        )
       }
     },
-    onSuccess: (_data, variables) => {
+    onSettled: (_data, _err, variables) => {
       queryClient.invalidateQueries({
         queryKey: [...MESSAGES_KEY, variables.sessionId],
       })

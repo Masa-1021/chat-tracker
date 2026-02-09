@@ -1,6 +1,27 @@
 import { a, defineData, type ClientSchema } from '@aws-amplify/backend'
+import { chatHandler } from '../functions/chat-handler/resource'
 
 const schema = a.schema({
+  // ========== Custom Types ==========
+  SendMessageResult: a.customType({
+    id: a.string().required(),
+    sessionId: a.string().required(),
+    messageId: a.string().required(),
+    content: a.string().required(),
+  }),
+
+  // ========== Custom Mutations ==========
+  sendMessage: a
+    .mutation()
+    .arguments({
+      sessionId: a.string().required(),
+      content: a.string().required(),
+      images: a.string().array(),
+    })
+    .returns(a.ref('SendMessageResult'))
+    .handler(a.handler.function(chatHandler))
+    .authorization((allow) => [allow.authenticated()]),
+
   // ========== User ==========
   User: a
     .model({
