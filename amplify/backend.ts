@@ -34,6 +34,18 @@ for (const [envKey, modelName] of Object.entries(tableMapping)) {
   const table = tables[modelName]
   chatLambda.addEnvironment(envKey, table.tableName)
   table.grantReadWriteData(chatLambda)
+  // Amplify Gen 2 の grantReadWriteData が GSI をカバーしない場合に備え
+  // 明示的にインデックスへのアクセスを許可
+  chatLambda.addToRolePolicy(
+    new PolicyStatement({
+      effect: Effect.ALLOW,
+      actions: [
+        'dynamodb:Query',
+        'dynamodb:Scan',
+      ],
+      resources: [`${table.tableArn}/index/*`],
+    }),
+  )
 }
 
 // --- seedData: DynamoDB table permissions ---

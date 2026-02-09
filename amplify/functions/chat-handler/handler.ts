@@ -214,7 +214,7 @@ async function getMessages(sessionId: string) {
   const { Items } = await dynamoClient.send(
     new QueryCommand({
       TableName: getEnv('CHATMESSAGE_TABLE_NAME'),
-      IndexName: 'sessionId-timestamp-index',
+      IndexName: 'chatMessagesBySessionIdAndTimestamp',
       KeyConditionExpression: 'sessionId = :sid',
       ExpressionAttributeValues: { ':sid': sessionId },
       ScanIndexForward: true,

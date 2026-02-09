@@ -66,8 +66,8 @@ export function ChatContainer() {
         })
       } catch (err) {
         console.error('Send message failed:', err)
-        stopListening()
       } finally {
+        stopListening()
         setIsSending(false)
       }
     },
