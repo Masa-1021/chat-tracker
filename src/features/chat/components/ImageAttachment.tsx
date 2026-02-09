@@ -56,7 +56,7 @@ export function ImageAttachment({
         aria-label="画像を添付"
         title="画像を添付"
       >
-        <SerendieSymbolImage size={20} />
+        <SerendieSymbolImage width={20} height={20} />
       </button>
 
       <input
@@ -90,7 +90,7 @@ export function ImageAttachment({
                 onClick={() => handleRemove(img.id)}
                 aria-label={`${img.file.name}を削除`}
               >
-                <SerendieSymbolClose size={14} />
+                <SerendieSymbolClose width={14} height={14} />
               </button>
             </div>
           ))}

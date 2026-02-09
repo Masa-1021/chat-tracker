@@ -77,7 +77,7 @@ export function ProfileSettings() {
           label="言語"
           name="language"
           items={LANGUAGE_OPTIONS}
-          value={language}
+          value={[language]}
           onValueChange={(detail) => setLanguage(detail.value[0])}
           disabled={isSaving}
         />
@@ -85,7 +85,7 @@ export function ProfileSettings() {
           label="表示テーマ"
           name="displayTheme"
           items={THEME_OPTIONS}
-          value={displayTheme}
+          value={[displayTheme]}
           onValueChange={(detail) => setDisplayTheme(detail.value[0])}
           disabled={isSaving}
         />

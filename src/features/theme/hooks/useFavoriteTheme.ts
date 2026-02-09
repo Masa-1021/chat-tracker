@@ -4,6 +4,13 @@ import { useAuthStore } from '@/features/auth/stores/authStore'
 
 const QUERY_KEY = ['favoriteThemes'] as const
 
+interface AmplifyFavoriteThemeItem {
+  id?: string | null
+  userId?: string | null
+  themeId?: string | null
+  createdAt?: string | null
+}
+
 export function useFavoriteThemes() {
   const user = useAuthStore((s) => s.user)
 
@@ -13,15 +20,15 @@ export function useFavoriteThemes() {
       if (!user) return []
       const client = getAmplifyClient()
       const { data, errors } =
-        await client.models.FavoriteTheme.listFavoriteThemeByUserId({
+        await client.models.FavoriteTheme.listFavoriteThemeByUserIdAndCreatedAt({
           userId: user.id,
         })
       if (errors) throw new Error(errors[0].message)
-      return data.map((item) => ({
-        id: item.id,
-        userId: item.userId,
-        themeId: item.themeId,
-        createdAt: item.createdAt,
+      return data.map((item: AmplifyFavoriteThemeItem) => ({
+        id: item.id as string,
+        userId: item.userId as string,
+        themeId: item.themeId as string,
+        createdAt: item.createdAt as string,
       }))
     },
     enabled: !!user,

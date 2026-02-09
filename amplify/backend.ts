@@ -1,7 +1,8 @@
 import { defineBackend } from '@aws-amplify/backend'
 import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam'
 import { Alarm, ComparisonOperator, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch'
-import { Duration } from 'aws-cdk-lib'
+import { Duration, Stack } from 'aws-cdk-lib'
+import type { Function as LambdaFunction } from 'aws-cdk-lib/aws-lambda'
 import { auth } from './auth/resource'
 import { data } from './data/resource'
 import { storage } from './storage/resource'
@@ -16,8 +17,10 @@ const backend = defineBackend({
   chatHandler,
 })
 
+const stack = Stack.of(backend.chatHandler.resources.lambda)
+
 // --- chatHandler: DynamoDB table name env vars & permissions ---
-const chatLambda = backend.chatHandler.resources.lambda
+const chatLambda = backend.chatHandler.resources.lambda as LambdaFunction
 const tables = backend.data.resources.tables
 
 const tableMapping: Record<string, string> = {
@@ -54,7 +57,7 @@ chatLambda.addToRolePolicy(
 )
 
 // --- CloudWatch Alarms: chatHandler monitoring ---
-new Alarm(chatLambda, 'ChatHandlerErrorAlarm', {
+new Alarm(stack, 'ChatHandlerErrorAlarm', {
   metric: chatLambda.metricErrors({ period: Duration.minutes(5) }),
   threshold: 5,
   evaluationPeriods: 1,
@@ -63,7 +66,7 @@ new Alarm(chatLambda, 'ChatHandlerErrorAlarm', {
   alarmDescription: 'chatHandler Lambda error rate >= 5 in 5 minutes',
 })
 
-new Alarm(chatLambda, 'ChatHandlerDurationAlarm', {
+new Alarm(stack, 'ChatHandlerDurationAlarm', {
   metric: chatLambda.metricDuration({ period: Duration.minutes(5) }),
   threshold: 60_000,
   evaluationPeriods: 2,

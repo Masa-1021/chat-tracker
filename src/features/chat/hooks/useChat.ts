@@ -6,28 +6,50 @@ import type { ChatSession, ChatMessage, SessionStatus } from '@/types'
 const SESSION_KEY = ['chatSessions'] as const
 const MESSAGES_KEY = ['chatMessages'] as const
 
-function mapSession(item: Record<string, unknown>): ChatSession {
+interface AmplifySessionItem {
+  id?: string | null
+  userId?: string | null
+  themeId?: string | null
+  title?: string | null
+  titleLocked?: boolean | null
+  status?: SessionStatus | null
+  messageCount?: number | null
+  createdAt?: string | null
+  updatedAt?: string | null
+}
+
+function mapSession(item: AmplifySessionItem): ChatSession {
   return {
     id: item.id as string,
     userId: item.userId as string,
     themeId: item.themeId as string,
     title: item.title as string,
-    titleLocked: (item.titleLocked as boolean) ?? false,
-    status: (item.status as SessionStatus) ?? 'ACTIVE',
-    messageCount: (item.messageCount as number) ?? 0,
+    titleLocked: item.titleLocked ?? false,
+    status: item.status ?? 'ACTIVE',
+    messageCount: item.messageCount ?? 0,
     createdAt: item.createdAt as string,
     updatedAt: item.updatedAt as string,
   }
 }
 
-function mapMessage(item: Record<string, unknown>): ChatMessage {
+interface AmplifyMessageItem {
+  id?: string | null
+  sessionId?: string | null
+  role?: 'USER' | 'ASSISTANT' | null
+  content?: string | null
+  images?: (string | null)[] | null
+  isStreaming?: boolean | null
+  timestamp?: string | null
+}
+
+function mapMessage(item: AmplifyMessageItem): ChatMessage {
   return {
     id: item.id as string,
     sessionId: item.sessionId as string,
     role: item.role as 'USER' | 'ASSISTANT',
     content: item.content as string,
-    images: (item.images as string[]) ?? [],
-    isStreaming: (item.isStreaming as boolean) ?? false,
+    images: item.images?.filter((img): img is string => img !== null) ?? [],
+    isStreaming: item.isStreaming ?? false,
     timestamp: item.timestamp as string,
   }
 }
@@ -42,12 +64,12 @@ export function useChatSessions() {
       if (!user) return []
       const client = getAmplifyClient()
       const { data, errors } =
-        await client.models.ChatSession.listChatSessionByUserId(
+        await client.models.ChatSession.listChatSessionByUserIdAndUpdatedAt(
           { userId: user.id },
           { sortDirection: 'DESC' },
         )
       if (errors) throw new Error(errors[0].message)
-      return data.map((item) => mapSession(item as Record<string, unknown>))
+      return data.map((item: AmplifySessionItem) => mapSession(item))
     },
     enabled: !!user,
   })
@@ -65,7 +87,7 @@ export function useChatSession(sessionId: string | undefined) {
       })
       if (errors) throw new Error(errors[0].message)
       if (!data) return null
-      return mapSession(data as Record<string, unknown>)
+      return mapSession(data as AmplifySessionItem)
     },
     enabled: !!sessionId,
   })
@@ -79,12 +101,12 @@ export function useChatMessages(sessionId: string | undefined) {
       if (!sessionId) return []
       const client = getAmplifyClient()
       const { data, errors } =
-        await client.models.ChatMessage.listChatMessageBySessionId(
+        await client.models.ChatMessage.listChatMessageBySessionIdAndTimestamp(
           { sessionId },
           { sortDirection: 'ASC' },
         )
       if (errors) throw new Error(errors[0].message)
-      return data.map((item) => mapMessage(item as Record<string, unknown>))
+      return data.map((item: AmplifyMessageItem) => mapMessage(item))
     },
     enabled: !!sessionId,
   })
@@ -114,7 +136,7 @@ export function useCreateSession() {
         messageCount: 0,
       })
       if (errors) throw new Error(errors[0].message)
-      return mapSession(data as Record<string, unknown>)
+      return mapSession(data as AmplifySessionItem)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: SESSION_KEY })
@@ -150,7 +172,7 @@ export function useSendMessage() {
       if (userMsg.errors) throw new Error(userMsg.errors[0].message)
 
       return {
-        userMessage: mapMessage(userMsg.data as Record<string, unknown>),
+        userMessage: mapMessage(userMsg.data as AmplifyMessageItem),
       }
     },
     onSuccess: (_data, variables) => {

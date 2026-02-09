@@ -7,6 +7,14 @@ interface StreamState {
   messageId: string | null
 }
 
+interface StreamChunkData {
+  sessionId?: string | null
+  messageId?: string | null
+  chunkIndex?: number | null
+  content?: string | null
+  isComplete?: boolean | null
+}
+
 /**
  * Hook for subscribing to StreamChunk updates via AppSync Subscription.
  * Accumulates streaming chunks and provides the full streamed content.
@@ -28,12 +36,12 @@ export function useChatStream(sessionId: string | undefined) {
     setState({ isStreaming: true, streamedContent: '', messageId: null })
 
     const client = getAmplifyClient()
-    const sub = client.models.StreamChunk.onStreamChunkBySessionId({
-      sessionId,
+    const sub = client.models.StreamChunk.onCreate({
+      filter: { sessionId: { eq: sessionId } },
     }).subscribe({
-      next: (chunk) => {
-        if (!chunk) return
-        const data = chunk as Record<string, unknown>
+      next: (event) => {
+        if (!event) return
+        const data = event as StreamChunkData
 
         if (data.isComplete) {
           // Stream complete
@@ -64,7 +72,7 @@ export function useChatStream(sessionId: string | undefined) {
           messageId: msgId,
         })
       },
-      error: (err) => {
+      error: (err: Error) => {
         console.error('Stream subscription error:', err)
         setState((prev) => ({ ...prev, isStreaming: false }))
       },

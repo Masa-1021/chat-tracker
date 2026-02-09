@@ -39,7 +39,7 @@ export function ThemeList() {
         <h1>テーマ管理</h1>
         <Link to="/themes/new">
           <Button styleType="filled" size="small">
-            <SerendieSymbolPlus size={16} />
+            <SerendieSymbolPlus width={16} height={16} />
             新規作成
           </Button>
         </Link>

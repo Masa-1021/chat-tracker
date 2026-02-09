@@ -17,7 +17,7 @@ export function ThemeCard({ theme, onDelete }: ThemeCardProps) {
   return (
     <article className="theme-card">
       <div className="theme-card-header">
-        <SerendieSymbolTag size={20} />
+        <SerendieSymbolTag width={20} height={20} />
         <Link to={`/themes/${theme.id}`} className="theme-card-name">
           {theme.name}
         </Link>

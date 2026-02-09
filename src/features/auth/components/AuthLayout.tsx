@@ -12,7 +12,7 @@ export function AuthLayout({ children, title }: AuthLayoutProps) {
     <div className="auth-layout">
       <div className="auth-card">
         <div className="auth-brand">
-          <SerendieSymbolChatRectangle size={32} />
+          <SerendieSymbolChatRectangle width={32} height={32} />
           <span className="auth-brand-name">{APP_NAME}</span>
         </div>
         <h1 className="auth-title">{title}</h1>

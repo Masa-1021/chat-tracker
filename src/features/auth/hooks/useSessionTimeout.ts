@@ -11,7 +11,7 @@ const ACTIVITY_EVENTS = [
 
 export function useSessionTimeout(onTimeout: () => void) {
   const { isAuthenticated } = useAuthStore()
-  const timerRef = useRef<ReturnType<typeof setTimeout>>()
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const resetTimer = useCallback(() => {
     if (timerRef.current) {

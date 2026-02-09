@@ -78,7 +78,7 @@ export function ThemeFieldEditor({
           onClick={addField}
           disabled={disabled || fields.length >= 20}
         >
-          <SerendieSymbolPlus size={16} />
+          <SerendieSymbolPlus width={16} height={16} />
           項目を追加
         </Button>
       </div>
@@ -138,7 +138,7 @@ export function ThemeFieldEditor({
               <Select
                 label="タイプ"
                 items={FIELD_TYPE_OPTIONS}
-                value={field.type}
+                value={[field.type]}
                 onValueChange={(detail) =>
                   updateField(index, {
                     type: detail.value[0] as FieldType,

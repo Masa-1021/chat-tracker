@@ -5,6 +5,7 @@ import { SerendieSymbolChatRectangle } from '@serendie/symbols'
 import { useChatSessions, useDeleteSession } from '../hooks/useChat'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { formatRelativeTime } from '@/shared/utils/date'
+import type { ChatSession } from '@/types'
 
 export function HistoryList() {
   const { data: sessions, isLoading } = useChatSessions()
@@ -13,7 +14,7 @@ export function HistoryList() {
   const [search, setSearch] = useState('')
 
   const filtered = (sessions ?? []).filter(
-    (s) =>
+    (s: ChatSession) =>
       s.title.toLowerCase().includes(search.toLowerCase()),
   )
 
@@ -46,7 +47,7 @@ export function HistoryList() {
         {filtered.map((session) => (
           <div key={session.id} className="history-item">
             <Link to={`/chat/${session.id}`} className="history-item-link">
-              <SerendieSymbolChatRectangle size={18} />
+              <SerendieSymbolChatRectangle width={18} height={18} />
               <div className="history-item-info">
                 <span className="history-item-title">{session.title}</span>
                 <span className="history-item-meta">

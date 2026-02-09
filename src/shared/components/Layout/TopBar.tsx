@@ -10,7 +10,7 @@ export function TopBar() {
   return (
     <header className="top-bar">
       <Link to="/" className="top-bar-brand" aria-label={`${APP_NAME} トップへ`}>
-        <SerendieSymbolChatRectangle size={24} />
+        <SerendieSymbolChatRectangle width={24} height={24} />
         <span className="top-bar-brand-name">{APP_NAME}</span>
       </Link>
       <div className="top-bar-actions">
@@ -21,7 +21,7 @@ export function TopBar() {
           shape="circle"
           styleType="ghost"
           size="small"
-          icon={<SerendieSymbolLogout size={20} />}
+          icon={<SerendieSymbolLogout width={20} height={20} />}
           onClick={signOut}
           aria-label="ログアウト"
         />

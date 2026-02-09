@@ -12,7 +12,7 @@ export function DataCard({ data }: DataCardProps) {
     <article className="data-card">
       <Link to={`/data/${data.id}`} className="data-card-link">
         <div className="data-card-header">
-          <SerendieSymbolFolder size={18} />
+          <SerendieSymbolFolder width={18} height={18} />
           <h3 className="data-card-title">{data.title}</h3>
         </div>
         <div className="data-card-meta">

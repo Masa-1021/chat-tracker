@@ -13,19 +13,19 @@ export function AdminDashboard() {
     {
       label: 'ユーザー数',
       value: users?.length ?? '-',
-      icon: <SerendieSymbolGroup size={24} />,
+      icon: <SerendieSymbolGroup width={24} height={24} />,
       link: '/admin/users',
     },
     {
       label: 'テーマ数',
       value: themes?.length ?? '-',
-      icon: <SerendieSymbolTag size={24} />,
+      icon: <SerendieSymbolTag width={24} height={24} />,
       link: '/admin/themes',
     },
     {
       label: '保存データ数',
       value: savedData?.length ?? '-',
-      icon: <SerendieSymbolTag size={24} />,
+      icon: <SerendieSymbolTag width={24} height={24} />,
       link: '/data',
     },
   ]

@@ -6,7 +6,33 @@ import type { SavedData, EditHistory, DataFilters } from '@/types'
 const DATA_KEY = ['savedData'] as const
 const HISTORY_KEY = ['editHistory'] as const
 
-function mapSavedData(item: Record<string, unknown>): SavedData {
+interface AmplifySavedDataItem {
+  id?: string | null
+  themeId?: string | null
+  sessionId?: string | null
+  title?: string | null
+  content?: string | number | boolean | object | null
+  markdownContent?: string | null
+  images?: (string | null)[] | null
+  createdBy?: string | null
+  isDeleted?: boolean | null
+  deletedAt?: string | null
+  deletedBy?: string | null
+  createdAt?: string | null
+  updatedAt?: string | null
+}
+
+interface AmplifyEditHistoryItem {
+  id?: string | null
+  dataId?: string | null
+  userId?: string | null
+  action?: 'CREATE' | 'UPDATE' | 'DELETE' | null
+  changes?: string | number | boolean | object | null
+  snapshot?: string | number | boolean | object | null
+  timestamp?: string | null
+}
+
+function mapSavedData(item: AmplifySavedDataItem): SavedData {
   const contentRaw = item.content
   const content: Record<string, string | number> =
     typeof contentRaw === 'string'
@@ -16,28 +42,36 @@ function mapSavedData(item: Record<string, unknown>): SavedData {
   return {
     id: item.id as string,
     themeId: item.themeId as string,
-    sessionId: item.sessionId as string | undefined,
+    sessionId: item.sessionId ?? undefined,
     title: item.title as string,
     content,
-    markdownContent: (item.markdownContent as string) ?? '',
-    images: (item.images as string[]) ?? [],
+    markdownContent: item.markdownContent ?? '',
+    images: item.images?.filter((img): img is string => img !== null) ?? [],
     createdBy: item.createdBy as string,
-    isDeleted: (item.isDeleted as boolean) ?? false,
-    deletedAt: item.deletedAt as string | undefined,
-    deletedBy: item.deletedBy as string | undefined,
+    isDeleted: item.isDeleted ?? false,
+    deletedAt: item.deletedAt ?? undefined,
+    deletedBy: item.deletedBy ?? undefined,
     createdAt: item.createdAt as string,
     updatedAt: item.updatedAt as string,
   }
 }
 
-function mapEditHistory(item: Record<string, unknown>): EditHistory {
+function mapEditHistory(item: AmplifyEditHistoryItem): EditHistory {
+  const changesRaw = item.changes
+  const changes: Record<string, unknown> =
+    typeof changesRaw === 'string' ? JSON.parse(changesRaw) : changesRaw ?? {}
+
+  const snapshotRaw = item.snapshot
+  const snapshot: Record<string, unknown> =
+    typeof snapshotRaw === 'string' ? JSON.parse(snapshotRaw) : snapshotRaw ?? {}
+
   return {
     id: item.id as string,
     dataId: item.dataId as string,
     userId: item.userId as string,
     action: item.action as 'CREATE' | 'UPDATE' | 'DELETE',
-    changes: (item.changes as Record<string, unknown>) ?? {},
-    snapshot: (item.snapshot as Record<string, unknown>) ?? {},
+    changes,
+    snapshot,
     timestamp: item.timestamp as string,
   }
 }
@@ -52,26 +86,26 @@ export function useSavedDataList(filters?: Partial<DataFilters>) {
       // Use theme index if themeId filter provided
       if (filters?.themeId) {
         const { data, errors } =
-          await client.models.SavedData.listSavedDataByThemeId(
+          await client.models.SavedData.listSavedDataByThemeIdAndCreatedAt(
             { themeId: filters.themeId },
             { sortDirection: 'DESC' },
           )
         if (errors) throw new Error(errors[0].message)
         return data
-          .map((item) => mapSavedData(item as Record<string, unknown>))
+          .map((item: AmplifySavedDataItem) => mapSavedData(item))
           .filter((d) => !d.isDeleted)
       }
 
       // Use createdBy index if createdBy filter provided
       if (filters?.createdBy) {
         const { data, errors } =
-          await client.models.SavedData.listSavedDataByCreatedBy(
+          await client.models.SavedData.listSavedDataByCreatedByAndCreatedAt(
             { createdBy: filters.createdBy },
             { sortDirection: 'DESC' },
           )
         if (errors) throw new Error(errors[0].message)
         return data
-          .map((item) => mapSavedData(item as Record<string, unknown>))
+          .map((item: AmplifySavedDataItem) => mapSavedData(item))
           .filter((d) => !d.isDeleted)
       }
 
@@ -79,7 +113,7 @@ export function useSavedDataList(filters?: Partial<DataFilters>) {
       const { data, errors } = await client.models.SavedData.list()
       if (errors) throw new Error(errors[0].message)
       return data
-        .map((item) => mapSavedData(item as Record<string, unknown>))
+        .map((item: AmplifySavedDataItem) => mapSavedData(item))
         .filter((d) => !d.isDeleted)
     },
   })
@@ -95,7 +129,7 @@ export function useSavedDataById(id: string | undefined) {
       const { data, errors } = await client.models.SavedData.get({ id })
       if (errors) throw new Error(errors[0].message)
       if (!data) return null
-      return mapSavedData(data as Record<string, unknown>)
+      return mapSavedData(data as AmplifySavedDataItem)
     },
     enabled: !!id,
   })
@@ -132,7 +166,7 @@ export function useCreateSavedData() {
 
       // Create edit history (CREATE action)
       await client.models.EditHistory.create({
-        dataId: (data as Record<string, unknown>).id as string,
+        dataId: (data as AmplifySavedDataItem).id as string,
         userId: user.id,
         action: 'CREATE',
         changes: JSON.stringify(input.content),
@@ -140,7 +174,7 @@ export function useCreateSavedData() {
         timestamp: new Date().toISOString(),
       })
 
-      return mapSavedData(data as Record<string, unknown>)
+      return mapSavedData(data as AmplifySavedDataItem)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: DATA_KEY })
@@ -186,12 +220,12 @@ export function useUpdateSavedData() {
         action: 'UPDATE',
         changes: JSON.stringify(input),
         snapshot: JSON.stringify(
-          (data as Record<string, unknown>).content,
+          (data as AmplifySavedDataItem).content,
         ),
         timestamp: new Date().toISOString(),
       })
 
-      return mapSavedData(data as Record<string, unknown>)
+      return mapSavedData(data as AmplifySavedDataItem)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: DATA_KEY })
@@ -242,12 +276,12 @@ export function useEditHistory(dataId: string | undefined) {
       if (!dataId) return []
       const client = getAmplifyClient()
       const { data, errors } =
-        await client.models.EditHistory.listEditHistoryByDataId(
+        await client.models.EditHistory.listEditHistoryByDataIdAndTimestamp(
           { dataId },
           { sortDirection: 'DESC' },
         )
       if (errors) throw new Error(errors[0].message)
-      return data.map((item) => mapEditHistory(item as Record<string, unknown>))
+      return data.map((item: AmplifyEditHistoryItem) => mapEditHistory(item))
     },
     enabled: !!dataId,
   })

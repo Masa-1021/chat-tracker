@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { SerendieSymbolTag } from '@serendie/symbols'
 import { useThemeList } from '@/features/theme/hooks/useTheme'
 import { useFavoriteThemes } from '@/features/theme/hooks/useFavoriteTheme'
-import type { Theme } from '@/types'
+import type { Theme, FavoriteTheme } from '@/types'
 
 interface ThemeSelectorProps {
   onSelect: (theme: Theme) => void
@@ -13,7 +13,7 @@ export function ThemeSelector({ onSelect }: ThemeSelectorProps) {
   const { data: themes, isLoading } = useThemeList()
   const { data: favorites } = useFavoriteThemes()
 
-  const favoriteIds = new Set(favorites?.map((f) => f.themeId) ?? [])
+  const favoriteIds = new Set(favorites?.map((f: FavoriteTheme) => f.themeId) ?? [])
 
   const filtered = (themes ?? []).filter((t) =>
     t.name.toLowerCase().includes(search.toLowerCase()),
@@ -50,7 +50,7 @@ export function ThemeSelector({ onSelect }: ThemeSelectorProps) {
             onClick={() => onSelect(theme)}
             type="button"
           >
-            <SerendieSymbolTag size={18} />
+            <SerendieSymbolTag width={18} height={18} />
             <div className="theme-selector-item-info">
               <span className="theme-selector-item-name">{theme.name}</span>
               <span className="theme-selector-item-meta">

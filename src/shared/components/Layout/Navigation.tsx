@@ -8,12 +8,12 @@ import {
   SerendieSymbolGroup,
 } from '@serendie/symbols'
 import { useAuthStore } from '@/features/auth/stores/authStore'
-import type { ComponentType } from 'react'
+import type { ComponentType, SVGProps } from 'react'
 
 interface NavItem {
   path: string
   label: string
-  icon: ComponentType<{ size?: number }>
+  icon: ComponentType<SVGProps<SVGSVGElement>>
 }
 
 interface NavGroup {
@@ -71,7 +71,7 @@ export function Navigation() {
                 >
                   {({ isActive }) => (
                     <>
-                      <item.icon size={20} />
+                      <item.icon width={20} height={20} />
                       <span>{item.label}</span>
                       {isActive && (
                         <span className="sr-only">（現在のページ）</span>

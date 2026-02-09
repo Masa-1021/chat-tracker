@@ -63,7 +63,7 @@ export function MessageInput({
         disabled={disabled || !value.trim()}
         aria-label="送信"
       >
-        <SerendieSymbolSend size={18} />
+        <SerendieSymbolSend width={18} height={18} />
       </Button>
     </div>
   )

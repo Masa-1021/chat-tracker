@@ -54,7 +54,7 @@ export const handler = async (event: ChatHandlerEvent) => {
   const messages = await getMessages(sessionId)
 
   // 2. Save user message
-  const userMessage = await saveMessage(sessionId, 'USER', content, images)
+  await saveMessage(sessionId, 'USER', content, images)
 
   // 3. Analyze collected data
   const themeFields: ThemeField[] =

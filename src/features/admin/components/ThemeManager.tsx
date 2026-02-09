@@ -27,7 +27,7 @@ export function ThemeManager() {
           name: theme.name,
           fields: theme.fields,
           isDefault: false,
-        })
+        } as Parameters<typeof updateTheme.mutateAsync>[0])
       }
     }
     const target = themes?.find((t) => t.id === themeId)
@@ -37,7 +37,7 @@ export function ThemeManager() {
         name: target.name,
         fields: target.fields,
         isDefault: true,
-      })
+      } as Parameters<typeof updateTheme.mutateAsync>[0])
     }
   }
 

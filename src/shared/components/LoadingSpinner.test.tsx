@@ -8,8 +8,8 @@ describe('LoadingSpinner', () => {
     expect(screen.getByRole('status')).toBeInTheDocument()
   })
 
-  it('renders with custom message', () => {
-    render(<LoadingSpinner message="読み込み中..." />)
+  it('renders with screen reader text', () => {
+    render(<LoadingSpinner />)
     expect(screen.getByText('読み込み中...')).toBeInTheDocument()
   })
 })

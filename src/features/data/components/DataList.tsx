@@ -4,6 +4,7 @@ import { useThemeList } from '@/features/theme/hooks/useTheme'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { DataCard } from './DataCard'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
+import type { SavedData } from '@/types'
 
 export function DataList() {
   const [themeFilter, setThemeFilter] = useState<string>('')
@@ -23,7 +24,7 @@ export function DataList() {
     if (!keyword) return items
     const lower = keyword.toLowerCase()
     return items.filter(
-      (d) =>
+      (d: SavedData) =>
         d.title.toLowerCase().includes(lower) ||
         d.markdownContent.toLowerCase().includes(lower),
     )
