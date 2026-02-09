@@ -131,14 +131,15 @@ export function useStreamingChat(sessionId: string | undefined) {
                   break
 
                 case 'done':
-                  // Stream complete - invalidate queries to get fresh data
+                  // Refetch messages FIRST so the assistant message appears in the list
+                  // before we hide the streaming bubble — prevents a flash of empty content
+                  await queryClient.invalidateQueries({
+                    queryKey: ['chatMessages', sessionId],
+                  })
                   setState({
                     isStreaming: false,
                     streamedContent: '',
                     error: null,
-                  })
-                  await queryClient.invalidateQueries({
-                    queryKey: ['chatMessages', sessionId],
                   })
                   await queryClient.invalidateQueries({
                     queryKey: ['chatSessions'],
@@ -159,10 +160,10 @@ export function useStreamingChat(sessionId: string | undefined) {
         }
 
         // If we exit the loop without a 'done' chunk, still clean up
-        setState({ isStreaming: false, streamedContent: '', error: null })
         await queryClient.invalidateQueries({
           queryKey: ['chatMessages', sessionId],
         })
+        setState({ isStreaming: false, streamedContent: '', error: null })
         await queryClient.invalidateQueries({
           queryKey: ['chatSessions'],
         })
