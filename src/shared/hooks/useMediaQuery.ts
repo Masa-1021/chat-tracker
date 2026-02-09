@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { BREAKPOINTS } from '@/shared/constants/config'
 
 export function useMediaQuery(query: string): boolean {
   const mediaQuery = useMemo(() => window.matchMedia(query), [query])
@@ -15,13 +16,15 @@ export function useMediaQuery(query: string): boolean {
 }
 
 export function useIsMobile(): boolean {
-  return useMediaQuery('(max-width: 767px)')
+  return useMediaQuery(`(max-width: ${BREAKPOINTS.tablet - 1}px)`)
 }
 
 export function useIsTablet(): boolean {
-  return useMediaQuery('(min-width: 768px) and (max-width: 1023px)')
+  return useMediaQuery(
+    `(min-width: ${BREAKPOINTS.tablet}px) and (max-width: ${BREAKPOINTS.desktop - 1}px)`
+  )
 }
 
 export function useIsDesktop(): boolean {
-  return useMediaQuery('(min-width: 1024px)')
+  return useMediaQuery(`(min-width: ${BREAKPOINTS.desktop}px)`)
 }

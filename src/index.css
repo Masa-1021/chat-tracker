@@ -1,16 +1,59 @@
-@import "tailwindcss";
 @layer reset, base, tokens, recipes, utilities;
 
-* {
-  box-sizing: border-box;
+/* Skip link for accessibility */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: 1000;
+  padding: 8px 16px;
+  background: var(--sd-system-color-impression-primary);
+  color: var(--sd-system-color-on-primary);
+  text-decoration: none;
+  font-size: 14px;
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  background-color: var(--sds-color-surface-default);
+.skip-link:focus {
+  top: 0;
 }
 
-#root {
-  min-height: 100vh;
+/* Focus visible ring (WCAG 2.2) */
+*:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--sd-system-color-surface-default),
+    0 0 0 4px var(--sd-system-color-impression-primary);
+  border-radius: 4px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sd-system-color-outline-default);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sd-system-color-outline-variant);
+}
+
+/* Utility: visually hidden (screen-reader only) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }

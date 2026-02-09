@@ -1,46 +1,86 @@
+import type { ThemeField } from '@/types'
+
+export function generateMarkdown(
+  title: string,
+  fields: ThemeField[],
+  data: Record<string, string | number>
+): string {
+  const lines: string[] = [`# ${title}`, '']
+
+  const sortedFields = [...fields].sort((a, b) => a.order - b.order)
+  for (const field of sortedFields) {
+    const value = data[field.id]
+    if (value !== undefined && value !== '') {
+      lines.push(`## ${field.name}`)
+      lines.push('')
+      lines.push(String(value))
+      lines.push('')
+    }
+  }
+
+  return lines.join('\n')
+}
+
+export function escapeMarkdown(text: string): string {
+  return text.replace(/[\\`*_{}[\]()#+\-.!|]/g, '\\$&')
+}
+
 /**
- * 簡易的なMarkdownレンダリング関数
- * 保存データのMarkdownコンテンツをHTMLに変換
+ * Lightweight markdown-to-HTML renderer for chat messages.
+ * Supports: paragraphs, bold, italic, inline code, code blocks, lists, headings.
  */
-export function renderMarkdown(markdown: string): string {
-  let html = markdown
+export function renderMarkdown(text: string): string {
+  let html = escapeHtml(text)
 
-  // 見出し
-  html = html.replace(/^### (.+)$/gm, '<h3 class="text-lg font-bold mt-4 mb-2">$1</h3>')
-  html = html.replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold mt-6 mb-3">$1</h2>')
-  html = html.replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mt-8 mb-4">$1</h1>')
+  // Code blocks (``` ... ```)
+  html = html.replace(
+    /```(\w*)\n([\s\S]*?)```/g,
+    '<pre><code>$2</code></pre>',
+  )
 
-  // 太字
-  html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold">$1</strong>')
+  // Inline code
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>')
 
-  // イタリック
-  html = html.replace(/\*(.+?)\*/g, '<em class="italic">$1</em>')
+  // Bold
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
 
-  // リスト
-  html = html.replace(/^- (.+)$/gm, '<li class="ml-4">$1</li>')
-  html = html.replace(/(<li.*<\/li>)/s, '<ul class="list-disc mb-4">$1</ul>')
+  // Italic
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>')
 
-  // 段落
-  html = html.replace(/^(?!<[h|u|l]|$)(.+)$/gm, '<p class="mb-2">$1</p>')
+  // Headings (## only in chat context)
+  html = html.replace(/^### (.+)$/gm, '<h4>$1</h4>')
+  html = html.replace(/^## (.+)$/gm, '<h3>$1</h3>')
+  html = html.replace(/^# (.+)$/gm, '<h2>$1</h2>')
 
-  // 改行
-  html = html.replace(/\n/g, '<br />')
+  // Unordered lists
+  html = html.replace(/^- (.+)$/gm, '<li>$1</li>')
+  html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+
+  // Paragraphs: split by double newlines
+  html = html
+    .split(/\n{2,}/)
+    .map((block) => {
+      const trimmed = block.trim()
+      if (!trimmed) return ''
+      if (
+        trimmed.startsWith('<h') ||
+        trimmed.startsWith('<ul') ||
+        trimmed.startsWith('<pre') ||
+        trimmed.startsWith('<li')
+      ) {
+        return trimmed
+      }
+      return `<p>${trimmed.replace(/\n/g, '<br>')}</p>`
+    })
+    .join('\n')
 
   return html
 }
 
-/**
- * データをMarkdown形式に変換
- */
-export function dataToMarkdown(
-  title: string,
-  content: Record<string, string | number>
-): string {
-  let markdown = `# ${title}\n\n`
-
-  for (const [key, value] of Object.entries(content)) {
-    markdown += `## ${key}\n\n${value}\n\n`
-  }
-
-  return markdown.trim()
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
 }

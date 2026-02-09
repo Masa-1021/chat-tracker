@@ -1,41 +1,13 @@
+import { ProgressIndicatorIndeterminate } from '@serendie/ui'
+
 interface LoadingSpinnerProps {
-  size?: 'sm' | 'md' | 'lg'
-  className?: string
+  size?: 'small' | 'medium' | 'large'
 }
 
-export function LoadingSpinner({ size = 'md', className = '' }: LoadingSpinnerProps) {
-  const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-8 h-8',
-    lg: 'w-12 h-12',
-  }
-
+export function LoadingSpinner({ size = 'medium' }: LoadingSpinnerProps) {
   return (
-    <div
-      className={`inline-block ${sizeClasses[size]} ${className}`}
-      role="status"
-      aria-label="読み込み中"
-    >
-      <svg
-        className="animate-spin text-primary-600"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        />
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        />
-      </svg>
+    <div role="status" aria-label="読み込み中">
+      <ProgressIndicatorIndeterminate type="circular" size={size} />
       <span className="sr-only">読み込み中...</span>
     </div>
   )
@@ -43,10 +15,32 @@ export function LoadingSpinner({ size = 'md', className = '' }: LoadingSpinnerPr
 
 export function LoadingOverlay() {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 flex flex-col items-center gap-4">
-        <LoadingSpinner size="lg" />
-        <p className="text-sm text-neutral-600">読み込み中...</p>
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(0, 0, 0, 0.4)',
+        zIndex: 50,
+      }}
+    >
+      <div
+        style={{
+          background: 'var(--sd-system-color-surface-default)',
+          borderRadius: '12px',
+          padding: '24px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '16px',
+        }}
+      >
+        <LoadingSpinner size="large" />
+        <p style={{ fontSize: '14px', color: 'var(--sd-system-color-label-low-emphasis)' }}>
+          読み込み中...
+        </p>
       </div>
     </div>
   )

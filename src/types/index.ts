@@ -1,33 +1,21 @@
+// ========== User ==========
+
+export type UserRole = 'ADMIN' | 'MEMBER'
+
 export interface User {
   id: string
   email: string
   displayName: string
-  voiceInputSilenceTimeout: number
+  role: UserRole
   language: string
   displayTheme: string
   createdAt: string
   updatedAt: string
 }
 
-export interface Team {
-  id: string
-  name: string
-  createdBy: string
-  createdAt: string
-  updatedAt: string
-}
+// ========== Theme ==========
 
-export interface Theme {
-  id: string
-  name: string
-  fields: ThemeField[]
-  notificationEnabled: boolean
-  createdBy: string
-  usageCount: number
-  isDefault: boolean
-  createdAt: string
-  updatedAt: string
-}
+export type FieldType = 'TEXT' | 'TEXTAREA' | 'DATE' | 'DATETIME' | 'NUMBER' | 'SELECT'
 
 export interface ThemeField {
   id: string
@@ -38,7 +26,28 @@ export interface ThemeField {
   order: number
 }
 
-export type FieldType = 'TEXT' | 'TEXTAREA' | 'DATE' | 'DATETIME' | 'NUMBER' | 'SELECT'
+export interface Theme {
+  id: string
+  name: string
+  fields: ThemeField[]
+  createdBy: string
+  usageCount: number
+  isDefault: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface FavoriteTheme {
+  id: string
+  userId: string
+  themeId: string
+  createdAt: string
+}
+
+// ========== Chat ==========
+
+export type SessionStatus = 'ACTIVE' | 'COMPLETED' | 'DRAFT'
+export type MessageRole = 'USER' | 'ASSISTANT'
 
 export interface ChatSession {
   id: string
@@ -53,8 +62,6 @@ export interface ChatSession {
   theme?: Theme
 }
 
-export type SessionStatus = 'ACTIVE' | 'COMPLETED' | 'DRAFT'
-
 export interface ChatMessage {
   id: string
   sessionId: string
@@ -65,7 +72,19 @@ export interface ChatMessage {
   timestamp: string
 }
 
-export type MessageRole = 'USER' | 'ASSISTANT'
+export interface StreamChunk {
+  id: string
+  sessionId: string
+  messageId: string
+  chunkIndex: number
+  content: string
+  isComplete: boolean
+  timestamp: string
+}
+
+// ========== Saved Data ==========
+
+export type EditAction = 'CREATE' | 'UPDATE' | 'DELETE'
 
 export interface SavedData {
   id: string
@@ -94,18 +113,16 @@ export interface EditHistory {
   timestamp: string
 }
 
-export type EditAction = 'CREATE' | 'UPDATE' | 'DELETE'
+// ========== Filters ==========
 
-export interface Notification {
-  id: string
-  userId: string
-  type: NotificationType
-  title: string
-  message: string
-  relatedDataId?: string
-  relatedTeamId?: string
-  isRead: boolean
-  createdAt: string
+export interface DataFilters {
+  themeId?: string
+  createdBy?: string
+  keyword?: string
+  dateFrom?: string
+  dateTo?: string
+  sortBy: 'createdAt' | 'updatedAt' | 'title'
+  sortOrder: 'ASC' | 'DESC'
+  limit: number
+  nextToken?: string
 }
-
-export type NotificationType = 'NEW_DATA' | 'DATA_UPDATED' | 'TEAM_INVITE'

@@ -1,5 +1,7 @@
 import { Component } from 'react'
 import type { ReactNode, ErrorInfo } from 'react'
+import { Button } from '@serendie/ui'
+import { captureError } from '@/shared/utils/errorReporter'
 
 interface Props {
   children: ReactNode
@@ -22,7 +24,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo)
+    captureError(error, {
+      source: 'ErrorBoundary',
+      extra: { componentStack: errorInfo.componentStack ?? '' },
+    })
   }
 
   render() {
@@ -32,26 +37,70 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-surface-default p-4">
-          <div className="max-w-md w-full bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-xl font-bold text-red-600 mb-4">エラーが発生しました</h2>
-            <p className="text-sm text-neutral-600 mb-4">
+        <div
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+          }}
+        >
+          <div
+            style={{
+              maxWidth: '400px',
+              width: '100%',
+              padding: '24px',
+              borderRadius: '12px',
+              background: 'var(--sd-system-color-surface-default)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            }}
+          >
+            <h2
+              style={{
+                fontSize: '20px',
+                fontWeight: 700,
+                color: 'var(--sd-system-color-status-error)',
+                marginBottom: '16px',
+              }}
+            >
+              エラーが発生しました
+            </h2>
+            <p
+              style={{
+                fontSize: '14px',
+                color: 'var(--sd-system-color-label-low-emphasis)',
+                marginBottom: '16px',
+              }}
+            >
               申し訳ございません。予期しないエラーが発生しました。
             </p>
             {this.state.error && (
-              <details className="text-xs text-neutral-500 mb-4">
-                <summary className="cursor-pointer font-medium">詳細を表示</summary>
-                <pre className="mt-2 p-2 bg-neutral-50 rounded overflow-auto">
+              <details style={{ fontSize: '12px', marginBottom: '16px' }}>
+                <summary style={{ cursor: 'pointer', fontWeight: 600 }}>
+                  詳細を表示
+                </summary>
+                <pre
+                  style={{
+                    marginTop: '8px',
+                    padding: '8px',
+                    borderRadius: '4px',
+                    background: 'var(--sd-system-color-surface-variant)',
+                    overflow: 'auto',
+                    fontSize: '11px',
+                  }}
+                >
                   {this.state.error.message}
                 </pre>
               </details>
             )}
-            <button
+            <Button
+              styleType="filled"
               onClick={() => window.location.reload()}
-              className="w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+              style={{ width: '100%' }}
             >
               ページを再読み込み
-            </button>
+            </Button>
           </div>
         </div>
       )
