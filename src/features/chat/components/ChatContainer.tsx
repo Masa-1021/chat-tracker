@@ -1,13 +1,11 @@
 import { useState, useCallback, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { useQueryClient } from '@tanstack/react-query'
 import {
   useChatSession,
   useChatMessages,
   useCreateSession,
-  useSendMessage,
 } from '../hooks/useChat'
-import { useChatStream } from '../hooks/useChatStream'
+import { useStreamingChat } from '../hooks/useStreamingChat'
 import { MessageList } from './MessageList'
 import { MessageInput } from './MessageInput'
 import { ThemeSelector } from './ThemeSelector'
@@ -17,15 +15,17 @@ import type { Theme } from '@/types'
 export function ChatContainer() {
   const { sessionId } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
 
   const { data: session } = useChatSession(sessionId)
   const { data: messages = [] } = useChatMessages(sessionId)
   const createSession = useCreateSession()
-  const sendMessage = useSendMessage()
 
-  const { isStreaming, streamedContent, startListening, stopListening } =
-    useChatStream(sessionId)
+  const {
+    isStreaming,
+    streamedContent,
+    error: streamError,
+    sendStreamingMessage,
+  } = useStreamingChat(sessionId)
 
   const [isSending, setIsSending] = useState(false)
   const pendingImagesRef = useRef<string[]>([])
@@ -48,10 +48,9 @@ export function ChatContainer() {
 
   const handleSend = useCallback(
     async (content: string) => {
-      if (!sessionId || isSending) return
+      if (!sessionId || isSending || isStreaming) return
 
       setIsSending(true)
-      startListening()
 
       const images =
         pendingImagesRef.current.length > 0
@@ -60,25 +59,14 @@ export function ChatContainer() {
       pendingImagesRef.current = []
 
       try {
-        await sendMessage.mutateAsync({ sessionId, content, images })
-        await queryClient.invalidateQueries({
-          queryKey: ['chatMessages', sessionId],
-        })
+        await sendStreamingMessage(content, images)
       } catch (err) {
         console.error('Send message failed:', err)
       } finally {
-        stopListening()
         setIsSending(false)
       }
     },
-    [
-      sessionId,
-      isSending,
-      sendMessage,
-      startListening,
-      stopListening,
-      queryClient,
-    ],
+    [sessionId, isSending, isStreaming, sendStreamingMessage],
   )
 
   // No session yet: show theme selection
@@ -110,6 +98,11 @@ export function ChatContainer() {
         isStreaming={isStreaming}
         isSending={isSending}
       />
+      {streamError && (
+        <div className="chat-error" role="alert">
+          エラー: {streamError}
+        </div>
+      )}
       <div className="chat-input-area">
         <ImageAttachment
           onImagesChange={handleImagesChange}

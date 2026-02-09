@@ -1,13 +1,15 @@
 import { defineBackend } from '@aws-amplify/backend'
 import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam'
 import { Alarm, ComparisonOperator, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch'
-import { Duration, Stack } from 'aws-cdk-lib'
+import { CfnOutput, Duration, Stack } from 'aws-cdk-lib'
+import { FunctionUrlAuthType, InvokeMode } from 'aws-cdk-lib/aws-lambda'
 import type { Function as LambdaFunction } from 'aws-cdk-lib/aws-lambda'
 import { auth } from './auth/resource'
 import { data } from './data/resource'
 import { storage } from './storage/resource'
 import { seedData } from './functions/seed-data/resource'
 import { chatHandler } from './functions/chat-handler/resource'
+import { streamingChat } from './functions/streaming-chat/resource'
 
 const backend = defineBackend({
   auth,
@@ -15,6 +17,7 @@ const backend = defineBackend({
   storage,
   seedData,
   chatHandler,
+  streamingChat,
 })
 
 const stack = Stack.of(backend.chatHandler.resources.lambda)
@@ -86,3 +89,61 @@ new Alarm(stack, 'ChatHandlerDurationAlarm', {
   treatMissingData: TreatMissingData.NOT_BREACHING,
   alarmDescription: 'chatHandler Lambda avg duration >= 60s over 2 periods',
 })
+
+// --- streamingChat: Function URL + DynamoDB + Bedrock ---
+const streamingLambda = backend.streamingChat.resources.lambda as LambdaFunction
+
+// Function URL with response streaming
+const fnUrl = streamingLambda.addFunctionUrl({
+  authType: FunctionUrlAuthType.NONE,
+  invokeMode: InvokeMode.RESPONSE_STREAM,
+  cors: {
+    allowedOrigins: [
+      'https://main.d3dt9ir2fyc53u.amplifyapp.com',
+      'http://localhost:5173',
+      'http://localhost:5174',
+    ],
+    allowedHeaders: ['content-type', 'authorization'],
+    allowedMethods: ['POST'],
+  },
+})
+
+new CfnOutput(stack, 'StreamingChatFunctionUrl', {
+  value: fnUrl.url,
+  description: 'Lambda Function URL for streaming chat',
+})
+
+// DynamoDB table permissions (no StreamChunk needed)
+const streamingTableMapping: Record<string, string> = {
+  CHATSESSION_TABLE_NAME: 'ChatSession',
+  CHATMESSAGE_TABLE_NAME: 'ChatMessage',
+  THEME_TABLE_NAME: 'Theme',
+}
+
+for (const [envKey, modelName] of Object.entries(streamingTableMapping)) {
+  const table = tables[modelName]
+  streamingLambda.addEnvironment(envKey, table.tableName)
+  table.grantReadWriteData(streamingLambda)
+  streamingLambda.addToRolePolicy(
+    new PolicyStatement({
+      effect: Effect.ALLOW,
+      actions: ['dynamodb:Query', 'dynamodb:Scan'],
+      resources: [`${table.tableArn}/index/*`],
+    }),
+  )
+}
+
+// Bedrock invoke permission
+streamingLambda.addToRolePolicy(
+  new PolicyStatement({
+    effect: Effect.ALLOW,
+    actions: [
+      'bedrock:InvokeModel',
+      'bedrock:InvokeModelWithResponseStream',
+    ],
+    resources: [
+      'arn:aws:bedrock:*::foundation-model/anthropic.*',
+      'arn:aws:bedrock:us-west-2:338658063532:inference-profile/us.anthropic.*',
+    ],
+  }),
+)
