@@ -2,7 +2,7 @@ import { defineBackend } from '@aws-amplify/backend'
 import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam'
 import { Alarm, ComparisonOperator, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch'
 import { CfnOutput, Duration, Stack } from 'aws-cdk-lib'
-import { FunctionUrlAuthType, InvokeMode } from 'aws-cdk-lib/aws-lambda'
+import { FunctionUrlAuthType, HttpMethod, InvokeMode } from 'aws-cdk-lib/aws-lambda'
 import type { Function as LambdaFunction } from 'aws-cdk-lib/aws-lambda'
 import { auth } from './auth/resource'
 import { data } from './data/resource'
@@ -104,7 +104,7 @@ const fnUrl = streamingLambda.addFunctionUrl({
       'http://localhost:5174',
     ],
     allowedHeaders: ['content-type', 'authorization'],
-    allowedMethods: ['POST'],
+    allowedMethods: [HttpMethod.POST],
   },
 })
 

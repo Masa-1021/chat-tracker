@@ -115,7 +115,7 @@ function decodeJwtParts(token: string): { header: JwtHeader; payload: JwtPayload
   return { header, payload, signatureInput, signature }
 }
 
-async function importJwk(jwk: JwkKey): Promise<CryptoKey> {
+async function importJwk(jwk: JwkKey) {
   return crypto.subtle.importKey(
     'jwk',
     { kty: jwk.kty, n: jwk.n, e: jwk.e, alg: jwk.alg, ext: true },
