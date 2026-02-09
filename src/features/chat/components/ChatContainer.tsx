@@ -108,6 +108,7 @@ export function ChatContainer() {
         messages={messages}
         streamingContent={streamedContent}
         isStreaming={isStreaming}
+        isSending={isSending}
       />
       <div className="chat-input-area">
         <ImageAttachment

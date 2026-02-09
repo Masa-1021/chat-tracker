@@ -552,6 +552,45 @@
   text-align: right;
 }
 
+/* ---- Thinking Indicator (AI processing) ---- */
+.thinking-bubble {
+  padding: 12px 20px;
+}
+
+.thinking-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  height: 20px;
+}
+
+.thinking-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--colors-sd-system-color-component-on-surface-variant);
+  animation: thinking-bounce 1.4s ease-in-out infinite;
+}
+
+.thinking-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.thinking-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes thinking-bounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 .streaming-indicator {
   display: inline-block;
   animation: blink 1s infinite;
@@ -597,6 +636,43 @@
 
 .message-input-textarea:disabled {
   opacity: 0.6;
+}
+
+/* ---- Voice Input Button ---- */
+.voice-input-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--colors-sd-system-color-component-outline-bright);
+  border-radius: 8px;
+  background: var(--colors-sd-system-color-component-surface-container-dim);
+  color: var(--colors-sd-system-color-component-on-surface);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 150ms, border-color 150ms;
+}
+
+.voice-input-btn:hover:not(:disabled) {
+  background: var(--colors-sd-system-color-interaction-hovered-variant);
+}
+
+.voice-input-btn--active {
+  background: var(--colors-sd-system-color-impression-negative-container-variant);
+  border-color: var(--colors-sd-system-color-impression-negative);
+  color: var(--colors-sd-system-color-impression-negative);
+  animation: voice-pulse 1.5s ease-in-out infinite;
+}
+
+.voice-input-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@keyframes voice-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 /* ---- Chat Input Area (input + image attachment) ---- */

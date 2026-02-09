@@ -1,6 +1,7 @@
-import { useState, useRef, type KeyboardEvent } from 'react'
+import { useState, useRef, useCallback, type KeyboardEvent } from 'react'
 import { Button } from '@serendie/ui'
-import { SerendieSymbolSend } from '@serendie/symbols'
+import { SerendieSymbolSend, SerendieSymbolMic, SerendieSymbolMicMuted } from '@serendie/symbols'
+import { useVoiceInput } from '../hooks/useVoiceInput'
 
 interface MessageInputProps {
   onSend: (content: string) => void
@@ -15,6 +16,19 @@ export function MessageInput({
 }: MessageInputProps) {
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  const handleTranscript = useCallback((text: string) => {
+    setValue((prev) => (prev ? `${prev} ${text}` : text))
+    // Auto-resize textarea after adding text
+    requestAnimationFrame(() => {
+      const el = textareaRef.current
+      if (!el) return
+      el.style.height = 'auto'
+      el.style.height = `${Math.min(el.scrollHeight, 200)}px`
+    })
+  }, [])
+
+  const { isListening, isSupported, toggleListening } = useVoiceInput(handleTranscript)
 
   const handleSend = () => {
     const trimmed = value.trim()
@@ -56,6 +70,22 @@ export function MessageInput({
         rows={1}
         aria-label="メッセージ入力"
       />
+      {isSupported && (
+        <button
+          type="button"
+          className={`voice-input-btn ${isListening ? 'voice-input-btn--active' : ''}`}
+          onClick={toggleListening}
+          disabled={disabled}
+          aria-label={isListening ? '音声入力を停止' : '音声入力を開始'}
+          title={isListening ? '音声入力を停止' : '音声入力'}
+        >
+          {isListening ? (
+            <SerendieSymbolMicMuted width={20} height={20} />
+          ) : (
+            <SerendieSymbolMic width={20} height={20} />
+          )}
+        </button>
+      )}
       <Button
         styleType="filled"
         size="small"

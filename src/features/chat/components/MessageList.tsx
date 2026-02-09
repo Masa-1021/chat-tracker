@@ -6,24 +6,36 @@ interface MessageListProps {
   messages: ChatMessage[]
   streamingContent?: string
   isStreaming?: boolean
+  isSending?: boolean
 }
 
 export function MessageList({
   messages,
   streamingContent,
   isStreaming,
+  isSending,
 }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages.length, streamingContent])
+  }, [messages.length, streamingContent, isSending])
 
   return (
     <div className="message-list" role="log" aria-label="チャット履歴">
       {messages.map((msg) => (
         <MessageBubble key={msg.id} message={msg} />
       ))}
+      {isSending && !streamingContent && (
+        <div className="message-bubble message-assistant thinking-bubble" aria-label="AIが考え中">
+          <div className="message-role">AI</div>
+          <div className="thinking-dots">
+            <span className="thinking-dot" />
+            <span className="thinking-dot" />
+            <span className="thinking-dot" />
+          </div>
+        </div>
+      )}
       {isStreaming && streamingContent && (
         <div className="message-bubble message-assistant">
           <div className="message-role">AI</div>
