@@ -32,12 +32,22 @@ interface AmplifyEditHistoryItem {
   timestamp?: string | null
 }
 
+function parseJsonObject(value: unknown): Record<string, unknown> {
+  let parsed = value
+  while (typeof parsed === 'string') {
+    try {
+      parsed = JSON.parse(parsed)
+    } catch {
+      return {}
+    }
+  }
+  return (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed))
+    ? (parsed as Record<string, unknown>)
+    : {}
+}
+
 function mapSavedData(item: AmplifySavedDataItem): SavedData {
-  const contentRaw = item.content
-  const content: Record<string, string | number> =
-    typeof contentRaw === 'string'
-      ? JSON.parse(contentRaw)
-      : (contentRaw as Record<string, string | number>) ?? {}
+  const content = parseJsonObject(item.content) as Record<string, string | number>
 
   return {
     id: item.id as string,
@@ -57,13 +67,8 @@ function mapSavedData(item: AmplifySavedDataItem): SavedData {
 }
 
 function mapEditHistory(item: AmplifyEditHistoryItem): EditHistory {
-  const changesRaw = item.changes
-  const changes: Record<string, unknown> =
-    typeof changesRaw === 'string' ? JSON.parse(changesRaw) : changesRaw ?? {}
-
-  const snapshotRaw = item.snapshot
-  const snapshot: Record<string, unknown> =
-    typeof snapshotRaw === 'string' ? JSON.parse(snapshotRaw) : snapshotRaw ?? {}
+  const changes = parseJsonObject(item.changes)
+  const snapshot = parseJsonObject(item.snapshot)
 
   return {
     id: item.id as string,

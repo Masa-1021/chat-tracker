@@ -5,13 +5,24 @@ import type { Theme, ThemeField } from '@/types'
 
 const QUERY_KEY = ['themes'] as const
 
+function parseJsonArray<T>(value: unknown): T[] {
+  let parsed = value
+  // Handle double-encoded JSON (string wrapped in string)
+  while (typeof parsed === 'string') {
+    try {
+      parsed = JSON.parse(parsed)
+    } catch {
+      return []
+    }
+  }
+  return Array.isArray(parsed) ? (parsed as T[]) : []
+}
+
 function mapTheme(raw: Record<string, unknown>): Theme {
   return {
     id: raw.id as string,
     name: raw.name as string,
-    fields: (typeof raw.fields === 'string'
-      ? JSON.parse(raw.fields)
-      : raw.fields) as ThemeField[],
+    fields: parseJsonArray<ThemeField>(raw.fields),
     createdBy: raw.createdBy as string,
     usageCount: (raw.usageCount as number) ?? 0,
     isDefault: (raw.isDefault as boolean) ?? false,

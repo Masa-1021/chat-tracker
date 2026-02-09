@@ -52,7 +52,7 @@ export class ErrorBoundary extends Component<Props, State> {
               width: '100%',
               padding: '24px',
               borderRadius: '12px',
-              background: 'var(--sd-system-color-surface-default)',
+              background: 'var(--colors-sd-system-color-component-surface)',
               boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
             }}
           >
@@ -60,7 +60,7 @@ export class ErrorBoundary extends Component<Props, State> {
               style={{
                 fontSize: '20px',
                 fontWeight: 700,
-                color: 'var(--sd-system-color-status-error)',
+                color: 'var(--colors-sd-system-color-impression-negative)',
                 marginBottom: '16px',
               }}
             >
@@ -69,7 +69,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <p
               style={{
                 fontSize: '14px',
-                color: 'var(--sd-system-color-label-low-emphasis)',
+                color: 'var(--colors-sd-system-color-component-on-surface-variant)',
                 marginBottom: '16px',
               }}
             >
@@ -85,7 +85,7 @@ export class ErrorBoundary extends Component<Props, State> {
                     marginTop: '8px',
                     padding: '8px',
                     borderRadius: '4px',
-                    background: 'var(--sd-system-color-surface-variant)',
+                    background: 'var(--colors-sd-system-color-component-surface-container-dim)',
                     overflow: 'auto',
                     fontSize: '11px',
                   }}
