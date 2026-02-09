@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import '@serendie/design-token/tokens.css'
 import '@serendie/ui/styles.css'
 import './index.css'
 import { configureAmplify } from './lib/amplify'

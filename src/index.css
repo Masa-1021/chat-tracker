@@ -7,8 +7,8 @@
   left: 0;
   z-index: 1000;
   padding: 8px 16px;
-  background: var(--sd-system-color-impression-primary);
-  color: var(--sd-system-color-on-primary);
+  background: var(--colors-sd-system-color-impression-primary);
+  color: var(--colors-sd-system-color-impression-on-primary);
   text-decoration: none;
   font-size: 14px;
 }
@@ -21,8 +21,8 @@
 *:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 2px var(--sd-system-color-surface-default),
-    0 0 0 4px var(--sd-system-color-impression-primary);
+    0 0 0 2px var(--colors-sd-system-color-component-surface),
+    0 0 0 4px var(--colors-sd-system-color-impression-primary);
   border-radius: 4px;
 }
 
@@ -37,12 +37,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--sd-system-color-outline-default);
+  background: var(--colors-sd-system-color-component-outline);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--sd-system-color-outline-variant);
+  background: var(--colors-sd-system-color-component-outline-dim);
 }
 
 /* Utility: visually hidden (screen-reader only) */
