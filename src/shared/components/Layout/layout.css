@@ -628,10 +628,11 @@
   color: var(--colors-sd-system-color-component-on-surface);
 }
 
-.message-input-textarea:focus {
+.message-input-textarea:focus,
+.message-input-textarea:focus-visible {
   outline: none;
   border-color: var(--colors-sd-system-color-impression-primary);
-  box-shadow: 0 0 0 2px rgba(var(--colors-sd-system-color-impression-primary), 0.15);
+  box-shadow: none;
 }
 
 .message-input-textarea:disabled {
@@ -887,9 +888,11 @@
   color: var(--colors-sd-system-color-component-on-surface);
 }
 
-.theme-selector-search:focus {
+.theme-selector-search:focus,
+.theme-selector-search:focus-visible {
   outline: none;
   border-color: var(--colors-sd-system-color-impression-primary);
+  box-shadow: none;
 }
 
 .theme-selector-list {
@@ -965,9 +968,11 @@
   color: var(--colors-sd-system-color-component-on-surface);
 }
 
-.history-search:focus {
+.history-search:focus,
+.history-search:focus-visible {
   outline: none;
   border-color: var(--colors-sd-system-color-impression-primary);
+  box-shadow: none;
 }
 
 .history-list {
@@ -1051,9 +1056,11 @@
   color: var(--colors-sd-system-color-component-on-surface);
 }
 
-.data-search:focus {
+.data-search:focus,
+.data-search:focus-visible {
   outline: none;
   border-color: var(--colors-sd-system-color-impression-primary);
+  box-shadow: none;
 }
 
 .data-theme-filter {
@@ -1230,9 +1237,11 @@
   color: var(--colors-sd-system-color-component-on-surface);
 }
 
-.data-form-textarea:focus {
+.data-form-textarea:focus,
+.data-form-textarea:focus-visible {
   outline: none;
   border-color: var(--colors-sd-system-color-impression-primary);
+  box-shadow: none;
 }
 
 .data-form-select {
