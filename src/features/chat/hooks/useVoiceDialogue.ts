@@ -188,10 +188,8 @@ export function useVoiceDialogue(
 
     const utterance = new SpeechSynthesisUtterance(lastContentRef.current)
     utterance.lang = 'ja-JP'
-    utterance.rate = 1.35
+    utterance.rate = 1.3
     utterance.pitch = 1.05
-    const voice = pickJapaneseVoice()
-    if (voice) utterance.voice = voice
 
     utterance.onend = () => {
       if (phaseRef.current === 'speaking') {
