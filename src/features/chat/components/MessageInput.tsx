@@ -28,7 +28,8 @@ export function MessageInput({
     })
   }, [])
 
-  const { isListening, isSupported, toggleListening } = useVoiceInput(handleTranscript)
+  const { isListening, isReady, interimText, isSupported, toggleListening } =
+    useVoiceInput(handleTranscript)
 
   const handleSend = () => {
     const trimmed = value.trim()
@@ -56,7 +57,22 @@ export function MessageInput({
     el.style.height = `${Math.min(el.scrollHeight, 200)}px`
   }
 
+  const voiceStatusText = isListening
+    ? isReady
+      ? interimText || 'お話しください...'
+      : 'マイク準備中...'
+    : ''
+
   return (
+    <div className="message-input-wrapper">
+    {voiceStatusText && (
+      <div className="voice-status" aria-live="polite">
+        <span className={`voice-status-dot${isReady ? ' voice-status-dot--ready' : ''}`} />
+        <span className={interimText ? 'voice-interim-text' : 'voice-status-label'}>
+          {voiceStatusText}
+        </span>
+      </div>
+    )}
     <div className="message-input-container">
       <textarea
         ref={textareaRef}
@@ -73,11 +89,23 @@ export function MessageInput({
       {isSupported && (
         <button
           type="button"
-          className={`voice-input-btn ${isListening ? 'voice-input-btn--active' : ''}`}
+          className={`voice-input-btn${isListening ? (isReady ? ' voice-input-btn--active' : ' voice-input-btn--preparing') : ''}`}
           onClick={toggleListening}
           disabled={disabled}
-          aria-label={isListening ? '音声入力を停止' : '音声入力を開始'}
-          title={isListening ? '音声入力を停止' : '音声入力'}
+          aria-label={
+            isListening
+              ? isReady
+                ? '音声入力を停止'
+                : 'マイク準備中'
+              : '音声入力を開始'
+          }
+          title={
+            isListening
+              ? isReady
+                ? '音声入力を停止'
+                : 'マイク準備中...'
+              : '音声入力'
+          }
         >
           {isListening ? (
             <SerendieSymbolMicMuted width={20} height={20} />
@@ -95,6 +123,7 @@ export function MessageInput({
       >
         <SerendieSymbolSend width={18} height={18} />
       </Button>
+    </div>
     </div>
   )
 }

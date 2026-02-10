@@ -19,6 +19,7 @@ interface SpeechRecognitionInstance extends EventTarget {
   abort(): void
   onresult: ((event: SpeechRecognitionEvent) => void) | null
   onerror: ((event: SpeechRecognitionErrorEvent) => void) | null
+  onaudiostart: (() => void) | null
   onend: (() => void) | null
 }
 
@@ -34,6 +35,8 @@ function getSpeechRecognition(): SpeechRecognitionConstructor | null {
 
 export function useVoiceInput(onTranscript: (text: string) => void) {
   const [isListening, setIsListening] = useState(false)
+  const [isReady, setIsReady] = useState(false)
+  const [interimText, setInterimText] = useState('')
   const [isSupported] = useState(() => getSpeechRecognition() !== null)
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
 
@@ -44,35 +47,51 @@ export function useVoiceInput(onTranscript: (text: string) => void) {
     const recognition = new SpeechRecognition()
     recognition.lang = 'ja-JP'
     recognition.continuous = true
-    recognition.interimResults = false
+    recognition.interimResults = true
+
+    recognition.onaudiostart = () => {
+      setIsReady(true)
+    }
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let transcript = ''
+      let interim = ''
+      let final = ''
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i]
-        if (result?.[0] && result.isFinal) {
-          transcript += result[0].transcript
+        if (result?.[0]) {
+          if (result.isFinal) {
+            final += result[0].transcript
+          } else {
+            interim += result[0].transcript
+          }
         }
       }
-      if (transcript) {
-        onTranscript(transcript)
+      setInterimText(interim)
+      if (final) {
+        onTranscript(final)
       }
     }
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('Speech recognition error:', event.error)
       setIsListening(false)
+      setIsReady(false)
+      setInterimText('')
       recognitionRef.current = null
     }
 
     recognition.onend = () => {
       setIsListening(false)
+      setIsReady(false)
+      setInterimText('')
       recognitionRef.current = null
     }
 
     recognitionRef.current = recognition
     recognition.start()
     setIsListening(true)
+    setIsReady(false)
+    setInterimText('')
   }, [onTranscript])
 
   const stopListening = useCallback(() => {
@@ -81,6 +100,8 @@ export function useVoiceInput(onTranscript: (text: string) => void) {
       recognitionRef.current = null
     }
     setIsListening(false)
+    setIsReady(false)
+    setInterimText('')
   }, [])
 
   const toggleListening = useCallback(() => {
@@ -100,5 +121,5 @@ export function useVoiceInput(onTranscript: (text: string) => void) {
     }
   }, [])
 
-  return { isListening, isSupported, toggleListening }
+  return { isListening, isReady, interimText, isSupported, toggleListening }
 }
