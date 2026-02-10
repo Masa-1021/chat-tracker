@@ -39,8 +39,16 @@ export function buildSystemPrompt(
     .map((f) => `【${f.name}】: {収集した値}`)
     .join('\n')
 
+  const now = new Date()
+  const jstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000)
+  const currentDatetime = jstNow.toISOString().replace('T', ' ').slice(0, 16)
+  const weekdays = ['日', '月', '火', '水', '木', '金', '土']
+  const weekday = weekdays[jstNow.getUTCDay()]
+
   return `あなたは製造現場の情報収集を支援するAIアシスタントです。
 ユーザーとの対話を通じて、必要な情報を収集し、構造化されたデータとして保存する手助けをします。
+
+## 現在日時: ${currentDatetime}（${weekday}曜日）JST
 
 ## 現在のテーマ: ${themeName}
 
@@ -61,6 +69,7 @@ ${collectedDescriptions || '（まだ情報が収集されていません）'}
 - 製造現場の専門用語を理解し適切に対応
 - ユーザーの入力を尊重しつつ、必要な情報を漏れなく収集
 - 確認時は箇条書きで情報を整理して表示
+- 「昨日」「今朝」「先週」「さっき」などの相対的な時間表現は、現在日時から自動的に具体的な日時に変換して記録する（ユーザーに再確認しない）
 
 ## 保存確認のフォーマット:
 全ての必須情報が揃った場合、以下のフォーマットで確認:
