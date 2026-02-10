@@ -41,18 +41,6 @@ function isTtsSupported(): boolean {
   return 'speechSynthesis' in window
 }
 
-/** Pick the most natural-sounding Japanese voice available */
-function pickJapaneseVoice(): SpeechSynthesisVoice | null {
-  const voices = speechSynthesis.getVoices()
-  // Prefer Google's premium voices (most natural)
-  return (
-    voices.find((v) => v.lang === 'ja-JP' && v.name.includes('Google')) ??
-    voices.find((v) => v.lang === 'ja-JP' && !v.localService) ??
-    voices.find((v) => v.lang.startsWith('ja')) ??
-    null
-  )
-}
-
 export function useVoiceDialogue(
   sendMessage: (content: string) => void,
   isStreaming: boolean,
@@ -74,15 +62,6 @@ export function useVoiceDialogue(
 
   const isSupported = getSpeechRecognition() !== null && isTtsSupported()
 
-  // Preload voices (Chrome loads them async)
-  useEffect(() => {
-    if (isTtsSupported()) {
-      speechSynthesis.getVoices()
-      const handler = () => speechSynthesis.getVoices()
-      speechSynthesis.addEventListener('voiceschanged', handler)
-      return () => speechSynthesis.removeEventListener('voiceschanged', handler)
-    }
-  }, [])
 
   const updatePhase = useCallback((p: VoiceDialoguePhase) => {
     phaseRef.current = p
