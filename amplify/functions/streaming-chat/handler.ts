@@ -230,7 +230,7 @@ export const handler = awslambda.streamifyResponse(
       return
     }
 
-    const { sessionId, content, images } = body
+    const { sessionId, content, images, voiceMode } = body
 
     // Set up NDJSON response stream
     const httpStream = awslambda.HttpResponseStream.from(responseStream, {
@@ -260,7 +260,7 @@ export const handler = awslambda.streamifyResponse(
       const collectedData = analyzeCollectedData(messages, themeFields)
 
       // 4. Build prompt & call Bedrock
-      const systemPrompt = buildSystemPrompt(theme.name, themeFields, collectedData)
+      const systemPrompt = buildSystemPrompt(theme.name, themeFields, collectedData, voiceMode)
       const bedrockMessages = formatMessagesForBedrock(messages, content, images)
       const messageId = generateId()
       let fullContent = ''

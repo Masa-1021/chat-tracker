@@ -43,7 +43,7 @@ export function useStreamingChat(sessionId: string | undefined) {
   const queryClient = useQueryClient()
 
   const sendStreamingMessage = useCallback(
-    async (content: string, images?: string[]) => {
+    async (content: string, images?: string[], voiceMode?: boolean) => {
       if (!sessionId || !STREAMING_URL) return
 
       // Optimistic update: show user message immediately
@@ -81,7 +81,7 @@ export function useStreamingChat(sessionId: string | undefined) {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${idToken}`,
           },
-          body: JSON.stringify({ sessionId, content, images }),
+          body: JSON.stringify({ sessionId, content, images, voiceMode: voiceMode || undefined }),
           signal: abortController.signal,
         })
 

@@ -4,6 +4,7 @@ export interface StreamingRequestBody {
   sessionId: string
   content: string
   images?: string[]
+  voiceMode?: boolean
 }
 
 export interface FunctionUrlEvent {

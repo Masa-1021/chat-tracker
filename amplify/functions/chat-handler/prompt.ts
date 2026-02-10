@@ -17,6 +17,7 @@ export function buildSystemPrompt(
   themeName: string,
   fields: ThemeField[],
   existingData: Record<string, string | null>,
+  voiceMode = false,
 ): string {
   const fieldDescriptions = fields
     .sort((a, b) => a.order - b.order)
@@ -84,7 +85,15 @@ ${confirmFields}
 ## 重要な制約:
 - 収集した情報は正確に記録し、勝手に改変しない
 - ユーザーが明示的に訂正した場合のみ情報を更新
-- 不明な点は推測せず、必ず確認を取る`
+- 不明な点は推測せず、必ず確認を取る${voiceMode ? `
+
+## 音声対話モード（現在有効）
+ユーザーは音声で対話しています。以下のルールを厳守してください：
+- 回答は1〜2文で端的に答える
+- 箇条書きや長い説明は避ける
+- 質問は一度に1つだけ
+- 「はい」「いいえ」で答えられる確認を優先する
+- 記号や括弧の多用は避ける（音声読み上げに不向き）` : ''}`
 }
 
 interface TitleMessage {

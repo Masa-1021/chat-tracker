@@ -10,6 +10,7 @@ import { MessageList } from './MessageList'
 import { MessageInput } from './MessageInput'
 import { ThemeSelector } from './ThemeSelector'
 import { ImageAttachment } from './ImageAttachment'
+import { VoiceDialogueOverlay } from './VoiceDialogueOverlay'
 import type { Theme } from '@/types'
 
 export function ChatContainer() {
@@ -28,6 +29,7 @@ export function ChatContainer() {
   } = useStreamingChat(sessionId)
 
   const [isSending, setIsSending] = useState(false)
+  const [voiceDialogueOpen, setVoiceDialogueOpen] = useState(false)
   const pendingImagesRef = useRef<string[]>([])
 
   // When no sessionId: show theme selector
@@ -67,6 +69,14 @@ export function ChatContainer() {
       }
     },
     [sessionId, isSending, isStreaming, sendStreamingMessage],
+  )
+
+  const handleVoiceSend = useCallback(
+    (content: string) => {
+      if (!sessionId) return
+      sendStreamingMessage(content, undefined, true)
+    },
+    [sessionId, sendStreamingMessage],
   )
 
   // No session yet: show theme selection
@@ -116,8 +126,16 @@ export function ChatContainer() {
               ? 'AI応答を待っています...'
               : 'メッセージを入力...'
           }
+          onVoiceDialogue={() => setVoiceDialogueOpen(true)}
         />
       </div>
+      <VoiceDialogueOverlay
+        isOpen={voiceDialogueOpen}
+        onClose={() => setVoiceDialogueOpen(false)}
+        onSend={handleVoiceSend}
+        isStreaming={isStreaming}
+        streamedContent={streamedContent}
+      />
     </div>
   )
 }

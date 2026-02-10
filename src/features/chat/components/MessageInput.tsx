@@ -7,12 +7,14 @@ interface MessageInputProps {
   onSend: (content: string) => void
   disabled?: boolean
   placeholder?: string
+  onVoiceDialogue?: () => void
 }
 
 export function MessageInput({
   onSend,
   disabled = false,
   placeholder = 'メッセージを入力...',
+  onVoiceDialogue,
 }: MessageInputProps) {
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -86,6 +88,19 @@ export function MessageInput({
         rows={1}
         aria-label="メッセージ入力"
       />
+      {isSupported && onVoiceDialogue && (
+        <button
+          type="button"
+          className="voice-dialogue-trigger"
+          onClick={onVoiceDialogue}
+          disabled={disabled}
+          aria-label="音声対話モード"
+          title="音声対話モード"
+        >
+          <SerendieSymbolMic width={16} height={16} />
+          <span className="voice-dialogue-trigger-label">対話</span>
+        </button>
+      )}
       {isSupported && (
         <button
           type="button"
