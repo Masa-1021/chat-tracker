@@ -168,6 +168,13 @@
               "isRequired": true,
               "attributes": []
             },
+            "voiceId": {
+              "name": "voiceId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
             "createdBy": {
               "name": "createdBy",
               "isArray": false,
