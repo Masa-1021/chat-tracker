@@ -1,8 +1,10 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { fetchAuthSession } from 'aws-amplify/auth'
 
 export type VoiceDialoguePhase = 'idle' | 'listening' | 'processing' | 'speaking'
 
 const SILENCE_TIMEOUT_MS = 2000
+const TTS_URL = import.meta.env.VITE_TTS_URL
 
 // ---- SpeechRecognition types ----
 interface SpeechRecognitionEvent {
@@ -37,8 +39,34 @@ function getSpeechRecognition(): SpeechRecognitionConstructor | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null
 }
 
-function isTtsSupported(): boolean {
-  return 'speechSynthesis' in window
+async function speakWithPolly(text: string): Promise<HTMLAudioElement> {
+  const session = await fetchAuthSession()
+  const idToken = session.tokens?.idToken?.toString()
+  if (!idToken) throw new Error('No ID token')
+
+  const response = await fetch(TTS_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${idToken}`,
+    },
+    body: JSON.stringify({ text, voiceId: 'Kazuha' }),
+  })
+
+  if (!response.ok) {
+    const errText = await response.text()
+    throw new Error(`TTS failed: ${response.status} ${errText}`)
+  }
+
+  const blob = await response.blob()
+  const url = URL.createObjectURL(blob)
+  const audio = new Audio(url)
+
+  // Clean up blob URL after playback
+  audio.addEventListener('ended', () => URL.revokeObjectURL(url), { once: true })
+  audio.addEventListener('error', () => URL.revokeObjectURL(url), { once: true })
+
+  return audio
 }
 
 export function useVoiceDialogue(
@@ -58,10 +86,10 @@ export function useVoiceDialogue(
   const interimRef = useRef('')
   const lastContentRef = useRef('')
   const sendMessageRef = useRef(sendMessage)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
   sendMessageRef.current = sendMessage
 
-  const isSupported = getSpeechRecognition() !== null && isTtsSupported()
-
+  const isSupported = getSpeechRecognition() !== null && !!TTS_URL
 
   const updatePhase = useCallback((p: VoiceDialoguePhase) => {
     phaseRef.current = p
@@ -159,31 +187,52 @@ export function useVoiceDialogue(
     }
   }, [streamedContent])
 
-  // Streaming done → speak the response
+  // Streaming done → speak the response with Polly
   useEffect(() => {
     if (phaseRef.current !== 'processing' || isStreaming || !lastContentRef.current) return
 
     updatePhase('speaking')
 
-    const utterance = new SpeechSynthesisUtterance(lastContentRef.current)
-    utterance.lang = 'ja-JP'
-    utterance.rate = 1.3
-    utterance.pitch = 1.05
+    const textToSpeak = lastContentRef.current
 
-    utterance.onend = () => {
-      if (phaseRef.current === 'speaking') {
-        startListening()
-      }
-    }
+    speakWithPolly(textToSpeak)
+      .then((audio) => {
+        if (phaseRef.current !== 'speaking') {
+          // Phase changed while fetching audio — discard
+          return
+        }
+        audioRef.current = audio
 
-    utterance.onerror = () => {
-      if (phaseRef.current === 'speaking') {
-        startListening()
-      }
-    }
+        audio.addEventListener('ended', () => {
+          audioRef.current = null
+          if (phaseRef.current === 'speaking') {
+            startListening()
+          }
+        }, { once: true })
 
-    speechSynthesis.cancel()
-    speechSynthesis.speak(utterance)
+        audio.addEventListener('error', () => {
+          audioRef.current = null
+          console.error('Audio playback error')
+          if (phaseRef.current === 'speaking') {
+            startListening()
+          }
+        }, { once: true })
+
+        audio.play().catch((err) => {
+          console.error('Audio play failed:', err)
+          audioRef.current = null
+          if (phaseRef.current === 'speaking') {
+            startListening()
+          }
+        })
+      })
+      .catch((err) => {
+        console.error('Polly TTS error:', err)
+        // Fallback: skip speaking and go back to listening
+        if (phaseRef.current === 'speaking') {
+          startListening()
+        }
+      })
   }, [isStreaming, updatePhase, startListening])
 
   const start = useCallback(() => {
@@ -194,7 +243,11 @@ export function useVoiceDialogue(
 
   const stop = useCallback(() => {
     updatePhase('idle')
-    speechSynthesis.cancel()
+    // Stop Polly audio
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current = null
+    }
     const rec = recognitionRef.current
     recognitionRef.current = null
     rec?.abort()
@@ -210,7 +263,10 @@ export function useVoiceDialogue(
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      speechSynthesis.cancel()
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
       recognitionRef.current?.abort()
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current)
     }

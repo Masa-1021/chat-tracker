@@ -10,6 +10,7 @@ import { storage } from './storage/resource'
 import { seedData } from './functions/seed-data/resource'
 import { chatHandler } from './functions/chat-handler/resource'
 import { streamingChat } from './functions/streaming-chat/resource'
+import { ttsFunction } from './functions/tts/resource'
 
 const backend = defineBackend({
   auth,
@@ -18,6 +19,7 @@ const backend = defineBackend({
   seedData,
   chatHandler,
   streamingChat,
+  ttsFunction,
 })
 
 const stack = Stack.of(backend.chatHandler.resources.lambda)
@@ -145,5 +147,36 @@ streamingLambda.addToRolePolicy(
       'arn:aws:bedrock:*::foundation-model/anthropic.*',
       'arn:aws:bedrock:us-west-2:338658063532:inference-profile/us.anthropic.*',
     ],
+  }),
+)
+
+// --- ttsFunction: Function URL + Polly ---
+const ttsLambda = backend.ttsFunction.resources.lambda as LambdaFunction
+
+const ttsFnUrl = ttsLambda.addFunctionUrl({
+  authType: FunctionUrlAuthType.NONE,
+  invokeMode: InvokeMode.BUFFERED,
+  cors: {
+    allowedOrigins: [
+      'https://main.d3dt9ir2fyc53u.amplifyapp.com',
+      'http://localhost:5173',
+      'http://localhost:5174',
+    ],
+    allowedHeaders: ['content-type', 'authorization'],
+    allowedMethods: [HttpMethod.POST],
+  },
+})
+
+new CfnOutput(stack, 'TtsFunctionUrl', {
+  value: ttsFnUrl.url,
+  description: 'Lambda Function URL for TTS (Amazon Polly)',
+})
+
+// Polly permissions
+ttsLambda.addToRolePolicy(
+  new PolicyStatement({
+    effect: Effect.ALLOW,
+    actions: ['polly:SynthesizeSpeech'],
+    resources: ['*'],
   }),
 )
