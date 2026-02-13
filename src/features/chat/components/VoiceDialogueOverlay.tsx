@@ -7,6 +7,7 @@ interface VoiceDialogueOverlayProps {
   onSend: (content: string) => void
   isStreaming: boolean
   streamedContent: string
+  voiceId?: string
 }
 
 export function VoiceDialogueOverlay({
@@ -15,9 +16,10 @@ export function VoiceDialogueOverlay({
   onSend,
   isStreaming,
   streamedContent,
+  voiceId,
 }: VoiceDialogueOverlayProps) {
   const { phase, transcript, interimText, aiResponse, start, stop } =
-    useVoiceDialogue(onSend, isStreaming, streamedContent)
+    useVoiceDialogue(onSend, isStreaming, streamedContent, voiceId)
 
   useEffect(() => {
     if (isOpen) {

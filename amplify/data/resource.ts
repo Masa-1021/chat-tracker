@@ -39,6 +39,7 @@ const schema = a.schema({
     .model({
       name: a.string().required(),
       fields: a.json().required(), // ThemeField[]
+      voiceId: a.string().default('Kazuha'),
       createdBy: a.string().required(),
       usageCount: a.integer().default(0),
       isDefault: a.boolean().default(false),

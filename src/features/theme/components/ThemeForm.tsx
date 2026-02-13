@@ -1,11 +1,18 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { TextField, Button } from '@serendie/ui'
+import { TextField, Button, Select } from '@serendie/ui'
 import { ThemeFieldEditor } from './ThemeFieldEditor'
 import { useThemeById, useCreateTheme, useUpdateTheme } from '../hooks/useTheme'
 import { createThemeSchema } from '../schema'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
-import type { ThemeField } from '@/types'
+import type { ThemeField, PollyVoiceId } from '@/types'
+
+const VOICE_OPTIONS = [
+  { label: 'Kazuha（女性・クリアで自然）', value: 'Kazuha' },
+  { label: 'Tomoko（女性・落ち着いたトーン）', value: 'Tomoko' },
+  { label: 'Takumi（男性・信頼感のある声）', value: 'Takumi' },
+  { label: 'Mizuki（女性・スタンダード）', value: 'Mizuki' },
+]
 import { ROUTES } from '@/shared/constants/config'
 
 export function ThemeForm() {
@@ -20,12 +27,14 @@ export function ThemeForm() {
   const [fields, setFields] = useState<ThemeField[]>(
     existingTheme?.fields ?? [],
   )
+  const [voiceId, setVoiceId] = useState<PollyVoiceId>(existingTheme?.voiceId ?? 'Kazuha')
   const [errors, setErrors] = useState<string[]>([])
 
   // Sync form when data loads for edit mode
   if (isEdit && existingTheme && !name && fields.length === 0) {
     setName(existingTheme.name)
     setFields(existingTheme.fields)
+    setVoiceId(existingTheme.voiceId ?? 'Kazuha')
   }
 
   if (isEdit && isLoading) {
@@ -46,9 +55,9 @@ export function ThemeForm() {
 
     try {
       if (isEdit && id) {
-        await updateTheme.mutateAsync({ id, name, fields })
+        await updateTheme.mutateAsync({ id, name, fields, voiceId })
       } else {
-        await createTheme.mutateAsync({ name, fields })
+        await createTheme.mutateAsync({ name, fields, voiceId })
       }
       navigate(ROUTES.themes, { replace: true })
     } catch (err) {
@@ -83,6 +92,14 @@ export function ThemeForm() {
           placeholder="例: トラブルメンテナンス"
           required
           fullWidth
+          disabled={isSaving}
+        />
+
+        <Select
+          label="音声対話の声"
+          items={VOICE_OPTIONS}
+          value={[voiceId]}
+          onValueChange={(detail) => setVoiceId(detail.value[0] as PollyVoiceId)}
           disabled={isSaving}
         />
 

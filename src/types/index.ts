@@ -26,10 +26,13 @@ export interface ThemeField {
   order: number
 }
 
+export type PollyVoiceId = 'Kazuha' | 'Tomoko' | 'Mizuki' | 'Takumi'
+
 export interface Theme {
   id: string
   name: string
   fields: ThemeField[]
+  voiceId: PollyVoiceId
   createdBy: string
   usageCount: number
   isDefault: boolean

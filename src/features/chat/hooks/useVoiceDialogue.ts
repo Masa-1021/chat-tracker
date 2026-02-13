@@ -39,7 +39,7 @@ function getSpeechRecognition(): SpeechRecognitionConstructor | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null
 }
 
-async function speakWithPolly(text: string): Promise<HTMLAudioElement> {
+async function speakWithPolly(text: string, voiceId = 'Kazuha'): Promise<HTMLAudioElement> {
   const session = await fetchAuthSession()
   const idToken = session.tokens?.idToken?.toString()
   if (!idToken) throw new Error('No ID token')
@@ -50,7 +50,7 @@ async function speakWithPolly(text: string): Promise<HTMLAudioElement> {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${idToken}`,
     },
-    body: JSON.stringify({ text, voiceId: 'Kazuha' }),
+    body: JSON.stringify({ text, voiceId }),
   })
 
   if (!response.ok) {
@@ -73,6 +73,7 @@ export function useVoiceDialogue(
   sendMessage: (content: string) => void,
   isStreaming: boolean,
   streamedContent: string,
+  voiceId?: string,
 ) {
   const [phase, setPhase] = useState<VoiceDialoguePhase>('idle')
   const [transcript, setTranscript] = useState('')
@@ -195,7 +196,7 @@ export function useVoiceDialogue(
 
     const textToSpeak = lastContentRef.current
 
-    speakWithPolly(textToSpeak)
+    speakWithPolly(textToSpeak, voiceId)
       .then((audio) => {
         if (phaseRef.current !== 'speaking') {
           // Phase changed while fetching audio — discard
@@ -233,7 +234,7 @@ export function useVoiceDialogue(
           startListening()
         }
       })
-  }, [isStreaming, updatePhase, startListening])
+  }, [isStreaming, updatePhase, startListening, voiceId])
 
   const start = useCallback(() => {
     setAiResponse('')

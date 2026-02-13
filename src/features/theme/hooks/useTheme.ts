@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getAmplifyClient } from '@/lib/amplifyClient'
 import { useAuthStore } from '@/features/auth/stores/authStore'
-import type { Theme, ThemeField } from '@/types'
+import type { Theme, ThemeField, PollyVoiceId } from '@/types'
 
 const QUERY_KEY = ['themes'] as const
 
@@ -23,6 +23,7 @@ function mapTheme(raw: Record<string, unknown>): Theme {
     id: raw.id as string,
     name: raw.name as string,
     fields: parseJsonArray<ThemeField>(raw.fields),
+    voiceId: (raw.voiceId as PollyVoiceId) ?? 'Kazuha',
     createdBy: raw.createdBy as string,
     usageCount: (raw.usageCount as number) ?? 0,
     isDefault: (raw.isDefault as boolean) ?? false,
@@ -63,11 +64,12 @@ export function useCreateTheme() {
   const user = useAuthStore((s) => s.user)
 
   return useMutation({
-    mutationFn: async (input: { name: string; fields: ThemeField[] }) => {
+    mutationFn: async (input: { name: string; fields: ThemeField[]; voiceId?: PollyVoiceId }) => {
       const client = getAmplifyClient()
       const { data, errors } = await client.models.Theme.create({
         name: input.name,
         fields: JSON.stringify(input.fields),
+        voiceId: input.voiceId ?? 'Kazuha',
         createdBy: user?.id ?? '',
         usageCount: 0,
         isDefault: false,
@@ -89,12 +91,14 @@ export function useUpdateTheme() {
       id: string
       name: string
       fields: ThemeField[]
+      voiceId?: PollyVoiceId
     }) => {
       const client = getAmplifyClient()
       const { data, errors } = await client.models.Theme.update({
         id: input.id,
         name: input.name,
         fields: JSON.stringify(input.fields),
+        voiceId: input.voiceId,
       })
       if (errors) throw new Error(errors[0].message)
       return mapTheme(data as unknown as Record<string, unknown>)

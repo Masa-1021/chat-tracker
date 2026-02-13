@@ -6,6 +6,7 @@ import {
   useCreateSession,
 } from '../hooks/useChat'
 import { useStreamingChat } from '../hooks/useStreamingChat'
+import { useThemeById } from '@/features/theme/hooks/useTheme'
 import { MessageList } from './MessageList'
 import { MessageInput } from './MessageInput'
 import { ThemeSelector } from './ThemeSelector'
@@ -19,6 +20,7 @@ export function ChatContainer() {
 
   const { data: session } = useChatSession(sessionId)
   const { data: messages = [] } = useChatMessages(sessionId)
+  const { data: theme } = useThemeById(session?.themeId)
   const createSession = useCreateSession()
 
   const {
@@ -135,6 +137,7 @@ export function ChatContainer() {
         onSend={handleVoiceSend}
         isStreaming={isStreaming}
         streamedContent={streamedContent}
+        voiceId={theme?.voiceId}
       />
     </div>
   )
