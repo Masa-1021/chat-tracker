@@ -29,12 +29,14 @@ export function ThemeForm() {
   )
   const [voiceId, setVoiceId] = useState<PollyVoiceId>(existingTheme?.voiceId ?? 'Kazuha')
   const [errors, setErrors] = useState<string[]>([])
+  const [synced, setSynced] = useState(!isEdit)
 
   // Sync form when data loads for edit mode
-  if (isEdit && existingTheme && !name && fields.length === 0) {
+  if (isEdit && existingTheme && !synced) {
     setName(existingTheme.name)
     setFields(existingTheme.fields)
     setVoiceId(existingTheme.voiceId ?? 'Kazuha')
+    setSynced(true)
   }
 
   if (isEdit && isLoading) {
