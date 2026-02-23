@@ -10,6 +10,8 @@ import {
   fetchUserAttributes,
 } from 'aws-amplify/auth'
 import { useAuthStore } from '../stores/authStore'
+import { isAdminRole } from '@/shared/utils/permissions'
+import { logAuditEvent } from '@/shared/utils/auditLogger'
 import type { User } from '@/types'
 
 export function useAuth() {
@@ -46,6 +48,16 @@ export function useAuth() {
       const result = await amplifySignIn({ username: email, password })
       if (result.nextStep.signInStep === 'DONE') {
         await checkCurrentUser()
+        // Fire-and-forget: log successful login (userId resolved after checkCurrentUser)
+        const updatedUser = useAuthStore.getState().user
+        if (updatedUser) {
+          void logAuditEvent({
+            userId: updatedUser.id,
+            userEmail: updatedUser.email,
+            action: 'LOGIN',
+            resourceType: 'Auth',
+          })
+        }
       }
       return result
     },
@@ -97,7 +109,7 @@ export function useAuth() {
     [],
   )
 
-  const isAdmin = user?.role === 'ADMIN'
+  const isAdmin = user ? isAdminRole(user.role) : false
 
   return {
     user,

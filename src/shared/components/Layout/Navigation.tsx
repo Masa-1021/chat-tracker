@@ -6,8 +6,10 @@ import {
   SerendieSymbolTag,
   SerendieSymbolGear,
   SerendieSymbolGroup,
+  SerendieSymbolClipboard,
 } from '@serendie/symbols'
 import { useAuthStore } from '@/features/auth/stores/authStore'
+import { isAdminRole } from '@/shared/utils/permissions'
 import type { ComponentType, SVGProps } from 'react'
 
 interface NavItem {
@@ -43,13 +45,14 @@ const ADMIN_GROUP: NavGroup = {
   items: [
     { path: '/admin/users', label: 'ユーザー管理', icon: SerendieSymbolGroup },
     { path: '/admin/themes', label: 'テーマ管理', icon: SerendieSymbolTag },
+    { path: '/admin/audit-log', label: '監査ログ', icon: SerendieSymbolClipboard },
     { path: '/admin', label: 'システム設定', icon: SerendieSymbolGear },
   ],
 }
 
 export function Navigation() {
   const user = useAuthStore((s) => s.user)
-  const isAdmin = user?.role === 'ADMIN'
+  const isAdmin = user ? isAdminRole(user.role) : false
 
   const groups = isAdmin ? [...NAV_GROUPS, ADMIN_GROUP] : NAV_GROUPS
 

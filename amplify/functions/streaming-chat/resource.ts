@@ -10,7 +10,5 @@ export const streamingChat = defineFunction({
     BEDROCK_MODEL_ID: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
     BEDROCK_REGION: 'us-west-2',
     BEDROCK_MAX_TOKENS: '4096',
-    USER_POOL_ID: 'us-west-2_eaUOifAaZ',
-    USER_POOL_CLIENT_ID: '2s6v921b0pupo64nn1l69nrsi',
   },
 })

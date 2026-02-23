@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getAmplifyClient } from '@/lib/amplifyClient'
 import { useAuthStore } from '@/features/auth/stores/authStore'
+import { logAuditEvent } from '@/shared/utils/auditLogger'
 import type { SavedData, EditHistory, DataFilters } from '@/types'
 
 const DATA_KEY = ['savedData'] as const
@@ -169,14 +170,26 @@ export function useCreateSavedData() {
       })
       if (errors) throw new Error(errors[0].message)
 
+      const savedDataId = (data as AmplifySavedDataItem).id as string
+
       // Create edit history (CREATE action)
       await client.models.EditHistory.create({
-        dataId: (data as AmplifySavedDataItem).id as string,
+        dataId: savedDataId,
         userId: user.id,
         action: 'CREATE',
         changes: JSON.stringify(input.content),
         snapshot: JSON.stringify(input.content),
         timestamp: new Date().toISOString(),
+      })
+
+      // Fire-and-forget audit log
+      void logAuditEvent({
+        userId: user.id,
+        userEmail: user.email,
+        action: 'DATA_CREATE',
+        resourceType: 'SavedData',
+        resourceId: savedDataId,
+        metadata: { title: input.title, themeId: input.themeId },
       })
 
       return mapSavedData(data as AmplifySavedDataItem)
@@ -230,6 +243,15 @@ export function useUpdateSavedData() {
         timestamp: new Date().toISOString(),
       })
 
+      // Fire-and-forget audit log
+      void logAuditEvent({
+        userId: user.id,
+        userEmail: user.email,
+        action: 'DATA_UPDATE',
+        resourceType: 'SavedData',
+        resourceId: input.id,
+      })
+
       return mapSavedData(data as AmplifySavedDataItem)
     },
     onSuccess: () => {
@@ -265,6 +287,15 @@ export function useDeleteSavedData() {
         changes: JSON.stringify({ isDeleted: true }),
         snapshot: JSON.stringify({}),
         timestamp: now,
+      })
+
+      // Fire-and-forget audit log
+      void logAuditEvent({
+        userId: user.id,
+        userEmail: user.email,
+        action: 'DATA_DELETE',
+        resourceType: 'SavedData',
+        resourceId: id,
       })
     },
     onSuccess: () => {

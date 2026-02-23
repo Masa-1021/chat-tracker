@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getAmplifyClient } from '@/lib/amplifyClient'
 import { useAuthStore } from '@/features/auth/stores/authStore'
+import { logAuditEvent } from '@/shared/utils/auditLogger'
 import type { Theme, ThemeField, PollyVoiceId } from '@/types'
 
 const QUERY_KEY = ['themes'] as const
@@ -75,7 +76,21 @@ export function useCreateTheme() {
         isDefault: false,
       })
       if (errors) throw new Error(errors[0].message)
-      return mapTheme(data as unknown as Record<string, unknown>)
+      const theme = mapTheme(data as unknown as Record<string, unknown>)
+
+      // Fire-and-forget audit log
+      if (user) {
+        void logAuditEvent({
+          userId: user.id,
+          userEmail: user.email,
+          action: 'THEME_CREATE',
+          resourceType: 'Theme',
+          resourceId: theme.id,
+          metadata: { name: theme.name },
+        })
+      }
+
+      return theme
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
@@ -85,6 +100,7 @@ export function useCreateTheme() {
 
 export function useUpdateTheme() {
   const queryClient = useQueryClient()
+  const user = useAuthStore((s) => s.user)
 
   return useMutation({
     mutationFn: async (input: {
@@ -101,7 +117,21 @@ export function useUpdateTheme() {
         voiceId: input.voiceId,
       })
       if (errors) throw new Error(errors[0].message)
-      return mapTheme(data as unknown as Record<string, unknown>)
+      const theme = mapTheme(data as unknown as Record<string, unknown>)
+
+      // Fire-and-forget audit log
+      if (user) {
+        void logAuditEvent({
+          userId: user.id,
+          userEmail: user.email,
+          action: 'THEME_UPDATE',
+          resourceType: 'Theme',
+          resourceId: input.id,
+          metadata: { name: input.name },
+        })
+      }
+
+      return theme
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
@@ -111,12 +141,24 @@ export function useUpdateTheme() {
 
 export function useDeleteTheme() {
   const queryClient = useQueryClient()
+  const user = useAuthStore((s) => s.user)
 
   return useMutation({
     mutationFn: async (id: string) => {
       const client = getAmplifyClient()
       const { errors } = await client.models.Theme.delete({ id })
       if (errors) throw new Error(errors[0].message)
+
+      // Fire-and-forget audit log
+      if (user) {
+        void logAuditEvent({
+          userId: user.id,
+          userEmail: user.email,
+          action: 'THEME_DELETE',
+          resourceType: 'Theme',
+          resourceId: id,
+        })
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })

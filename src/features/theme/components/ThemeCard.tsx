@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 import { Button } from '@serendie/ui'
 import { SerendieSymbolTag } from '@serendie/symbols'
-import { useAuthStore } from '@/features/auth/stores/authStore'
+import { useIsAdmin } from '@/shared/hooks/usePermission'
 import type { Theme } from '@/types'
 import { formatRelativeTime } from '@/shared/utils/date'
 
@@ -11,8 +11,7 @@ interface ThemeCardProps {
 }
 
 export function ThemeCard({ theme, onDelete }: ThemeCardProps) {
-  const user = useAuthStore((s) => s.user)
-  const isAdmin = user?.role === 'ADMIN'
+  const isAdmin = useIsAdmin()
 
   return (
     <article className="theme-card">

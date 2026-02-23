@@ -6,8 +6,5 @@ export const ttsFunction = defineFunction({
   timeoutSeconds: 30,
   memoryMB: 256,
   resourceGroupName: 'data',
-  environment: {
-    USER_POOL_ID: 'us-west-2_eaUOifAaZ',
-    USER_POOL_CLIENT_ID: '2s6v921b0pupo64nn1l69nrsi',
-  },
+  environment: {},
 })

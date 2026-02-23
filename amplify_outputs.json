@@ -1,12 +1,12 @@
 {
   "auth": {
-    "user_pool_id": "us-west-2_eaUOifAaZ",
-    "aws_region": "us-west-2",
-    "user_pool_client_id": "2s6v921b0pupo64nn1l69nrsi",
-    "identity_pool_id": "us-west-2:6666cfd8-8da3-4c24-95de-4c7065fa5ba9",
+    "user_pool_id": "ap-northeast-1_2iVTrqABE",
+    "aws_region": "ap-northeast-1",
+    "user_pool_client_id": "1jb5sufiovdr5mhvj8vh9imcnt",
+    "identity_pool_id": "ap-northeast-1:ec3338fd-726f-41d4-a19f-71f4d58708eb",
     "mfa_methods": [],
     "standard_required_attributes": [
-      "sub"
+      "email"
     ],
     "username_attributes": [
       "email"
@@ -14,19 +14,20 @@
     "user_verification_types": [
       "email"
     ],
+    "groups": [],
     "mfa_configuration": "NONE",
     "password_policy": {
       "min_length": 8,
       "require_lowercase": true,
       "require_numbers": true,
-      "require_symbols": false,
+      "require_symbols": true,
       "require_uppercase": true
     },
     "unauthenticated_identities_enabled": true
   },
   "data": {
-    "url": "https://tdklltdfingwlmwigttkskftn4.appsync-api.us-west-2.amazonaws.com/graphql",
-    "aws_region": "us-west-2",
+    "url": "https://vd7u7bpelzhixoyaj7josmnbva.appsync-api.ap-northeast-1.amazonaws.com/graphql",
+    "aws_region": "ap-northeast-1",
     "default_authorization_type": "AMAZON_COGNITO_USER_POOLS",
     "authorization_types": [
       "AWS_IAM"
@@ -34,6 +35,91 @@
     "model_introspection": {
       "version": 1,
       "models": {
+        "Organization": {
+          "name": "Organization",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "name": {
+              "name": "name",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "plan": {
+              "name": "plan",
+              "isArray": false,
+              "type": {
+                "enum": "OrganizationPlan"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "maxUsers": {
+              "name": "maxUsers",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            },
+            "isActive": {
+              "name": "isActive",
+              "isArray": false,
+              "type": "Boolean",
+              "isRequired": false,
+              "attributes": []
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": []
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": []
+            }
+          },
+          "syncable": true,
+          "pluralName": "Organizations",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "update",
+                      "delete",
+                      "read"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
+        },
         "User": {
           "name": "User",
           "fields": {
@@ -64,6 +150,13 @@
               "type": {
                 "enum": "UserRole"
               },
+              "isRequired": false,
+              "attributes": []
+            },
+            "organizationId": {
+              "name": "organizationId",
+              "isArray": false,
+              "type": "String",
               "isRequired": false,
               "attributes": []
             },
@@ -1064,12 +1157,165 @@
             "primaryKeyFieldName": "id",
             "sortKeyFieldNames": []
           }
+        },
+        "AuditLog": {
+          "name": "AuditLog",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "organizationId": {
+              "name": "organizationId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "userId": {
+              "name": "userId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "userEmail": {
+              "name": "userEmail",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "action": {
+              "name": "action",
+              "isArray": false,
+              "type": {
+                "enum": "AuditLogAction"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "resourceType": {
+              "name": "resourceType",
+              "isArray": false,
+              "type": {
+                "enum": "AuditLogResourceType"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "resourceId": {
+              "name": "resourceId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "metadata": {
+              "name": "metadata",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": false,
+              "attributes": []
+            },
+            "timestamp": {
+              "name": "timestamp",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": true,
+              "attributes": []
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "AuditLogs",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "key",
+              "properties": {
+                "name": "auditLogsByUserIdAndTimestamp",
+                "queryField": "listAuditLogByUserIdAndTimestamp",
+                "fields": [
+                  "userId",
+                  "timestamp"
+                ]
+              }
+            },
+            {
+              "type": "key",
+              "properties": {
+                "name": "auditLogsByActionAndTimestamp",
+                "queryField": "listAuditLogByActionAndTimestamp",
+                "fields": [
+                  "action",
+                  "timestamp"
+                ]
+              }
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "update",
+                      "delete",
+                      "read"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
         }
       },
       "enums": {
+        "OrganizationPlan": {
+          "name": "OrganizationPlan",
+          "values": [
+            "FREE",
+            "STARTER",
+            "PROFESSIONAL",
+            "ENTERPRISE"
+          ]
+        },
         "UserRole": {
           "name": "UserRole",
           "values": [
+            "SUPER_ADMIN",
+            "ORG_ADMIN",
+            "MANAGER",
+            "OPERATOR",
+            "VIEWER",
             "ADMIN",
             "MEMBER"
           ]
@@ -1095,6 +1341,37 @@
             "CREATE",
             "UPDATE",
             "DELETE"
+          ]
+        },
+        "AuditLogAction": {
+          "name": "AuditLogAction",
+          "values": [
+            "LOGIN",
+            "LOGOUT",
+            "LOGIN_FAILED",
+            "DATA_VIEW",
+            "DATA_CREATE",
+            "DATA_UPDATE",
+            "DATA_DELETE",
+            "DATA_EXPORT",
+            "USER_CREATE",
+            "USER_UPDATE",
+            "USER_DEACTIVATE",
+            "THEME_CREATE",
+            "THEME_UPDATE",
+            "THEME_DELETE",
+            "ADMIN_ACCESS"
+          ]
+        },
+        "AuditLogResourceType": {
+          "name": "AuditLogResourceType",
+          "values": [
+            "ChatSession",
+            "SavedData",
+            "Theme",
+            "User",
+            "Auth",
+            "Organization"
           ]
         }
       },
@@ -1167,13 +1444,13 @@
     }
   },
   "storage": {
-    "aws_region": "us-west-2",
-    "bucket_name": "amplify-chattracker-dw358-chattrackerstoragebucket-vlvarhamywtv",
+    "aws_region": "ap-northeast-1",
+    "bucket_name": "amplify-chattracker-masat-chattrackerstoragebucket-p9xn72ijyjyq",
     "buckets": [
       {
         "name": "chatTrackerStorage",
-        "bucket_name": "amplify-chattracker-dw358-chattrackerstoragebucket-vlvarhamywtv",
-        "aws_region": "us-west-2",
+        "bucket_name": "amplify-chattracker-masat-chattrackerstoragebucket-p9xn72ijyjyq",
+        "aws_region": "ap-northeast-1",
         "paths": {
           "public/default/*": {
             "guest": [

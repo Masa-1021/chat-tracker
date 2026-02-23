@@ -11,6 +11,7 @@ import {
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb'
 import { buildSystemPrompt, buildTitleGenerationPrompt } from './prompt'
+import type { PastCase } from './prompt'
 import type {
   BedrockContentBlock,
   BedrockMessage,
@@ -51,7 +52,10 @@ export const handler = async (event: ChatHandlerEvent) => {
     throw new Error('AI_THEME_NOT_FOUND')
   }
 
-  const messages = await getMessages(sessionId)
+  const [messages, pastCases] = await Promise.all([
+    getMessages(sessionId),
+    queryPastCases(session.themeId),
+  ])
 
   // 2. Save user message
   await saveMessage(sessionId, 'USER', content, images)
@@ -64,7 +68,7 @@ export const handler = async (event: ChatHandlerEvent) => {
   const collectedData = analyzeCollectedData(messages, themeFields)
 
   // 4. Build system prompt
-  const systemPrompt = buildSystemPrompt(theme.name, themeFields, collectedData)
+  const systemPrompt = buildSystemPrompt(theme.name, themeFields, collectedData, false, pastCases)
 
   // 5. Stream Bedrock response
   const messageId = generateId()
@@ -174,6 +178,42 @@ export const handler = async (event: ChatHandlerEvent) => {
     messageId,
     content: fullContent,
   }
+}
+
+// --- RAG: query past saved data for context ---
+
+async function queryPastCases(themeId: string): Promise<PastCase[]> {
+  const tableName = process.env.SAVEDDATA_TABLE_NAME
+  if (!tableName) return []
+
+  const { Items } = await dynamoClient.send(
+    new QueryCommand({
+      TableName: tableName,
+      IndexName: 'savedDataByThemeIdAndCreatedAt',
+      KeyConditionExpression: 'themeId = :tid',
+      ExpressionAttributeValues: { ':tid': themeId },
+      ScanIndexForward: false, // newest first
+      Limit: 20,
+    }),
+  )
+
+  return (Items ?? [])
+    .filter((item) => !item['isDeleted'])
+    .slice(0, 10)
+    .map((item) => {
+      let content: Record<string, string> = {}
+      try {
+        const raw = item['content']
+        const parsed: Record<string, string> =
+          typeof raw === 'string' ? JSON.parse(raw) : (raw as Record<string, string>)
+        content = parsed
+      } catch { /* empty */ }
+      return {
+        title: (item['title'] as string) ?? '',
+        content,
+        createdAt: (item['createdAt'] as string) ?? '',
+      }
+    })
 }
 
 // --- Helper functions ---

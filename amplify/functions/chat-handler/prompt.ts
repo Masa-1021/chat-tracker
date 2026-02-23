@@ -1,5 +1,11 @@
 import type { ThemeField } from './types'
 
+export interface PastCase {
+  title: string
+  content: Record<string, string>
+  createdAt: string
+}
+
 const FIELD_TYPE_DESCRIPTIONS: Record<string, string> = {
   TEXT: 'テキスト（短い文章）',
   TEXTAREA: 'テキスト（長い文章）',
@@ -13,11 +19,23 @@ function getFieldTypeDescription(type: string): string {
   return FIELD_TYPE_DESCRIPTIONS[type] ?? type
 }
 
+function formatPastCases(cases: PastCase[]): string {
+  return cases
+    .map((c, i) => {
+      const fields = Object.entries(c.content)
+        .map(([key, val]) => `  - ${key}: ${val}`)
+        .join('\n')
+      return `### 事例${i + 1}: ${c.title}（${c.createdAt.slice(0, 10)}）\n${fields}`
+    })
+    .join('\n\n')
+}
+
 export function buildSystemPrompt(
   themeName: string,
   fields: ThemeField[],
   existingData: Record<string, string | null>,
   voiceMode = false,
+  pastCases: PastCase[] = [],
 ): string {
   const fieldDescriptions = fields
     .sort((a, b) => a.order - b.order)
@@ -89,6 +107,16 @@ ${confirmFields}
 - なぜ起きたかの記述 → 原因
 - 何をしたか/するかの記述 → 対策/是正処置
 - 振り分けを修正した場合は、ユーザーに「○○は△△として記録しますね」と自然に伝えてください
+
+## 過去の事例データ（ナレッジベース）:
+${pastCases.length > 0 ? formatPastCases(pastCases) : '（過去の事例データはまだありません）'}
+
+## ナレッジ活用ガイドライン:
+- ユーザーの報告内容に類似する過去事例がある場合、参考として言及してください
+- 「過去にも同様の事例がありました：[事例のタイトル]」のように自然に共有
+- 過去事例の対処内容や原因を参考情報として提供
+- ただし過去事例は参考であり、現在の状況を優先すること
+- ユーザーが明示的に「過去の事例は？」と聞いた場合は詳細に回答
 
 ## 重要な制約:
 - 収集した情報は正確に記録し、勝手に改変しない（ただし項目の振り分けは適切に行う）

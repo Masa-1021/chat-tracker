@@ -23,6 +23,11 @@ const backend = defineBackend({
 })
 
 const stack = Stack.of(backend.chatHandler.resources.lambda)
+const accountId = stack.account
+
+// --- Auth: pass Cognito IDs to Lambda functions dynamically ---
+const userPool = backend.auth.resources.userPool
+const userPoolClient = backend.auth.resources.cfnResources.cfnUserPoolClient
 
 // --- chatHandler: DynamoDB table name env vars & permissions ---
 const chatLambda = backend.chatHandler.resources.lambda as LambdaFunction
@@ -33,6 +38,7 @@ const tableMapping: Record<string, string> = {
   CHATMESSAGE_TABLE_NAME: 'ChatMessage',
   STREAMCHUNK_TABLE_NAME: 'StreamChunk',
   THEME_TABLE_NAME: 'Theme',
+  SAVEDDATA_TABLE_NAME: 'SavedData',
 }
 
 for (const [envKey, modelName] of Object.entries(tableMapping)) {
@@ -68,7 +74,7 @@ chatLambda.addToRolePolicy(
     ],
     resources: [
       'arn:aws:bedrock:*::foundation-model/anthropic.*',
-      'arn:aws:bedrock:us-west-2:338658063532:inference-profile/us.anthropic.*',
+      `arn:aws:bedrock:us-west-2:${accountId}:inference-profile/us.anthropic.*`,
     ],
   }),
 )
@@ -101,7 +107,7 @@ const fnUrl = streamingLambda.addFunctionUrl({
   invokeMode: InvokeMode.RESPONSE_STREAM,
   cors: {
     allowedOrigins: [
-      'https://main.d3dt9ir2fyc53u.amplifyapp.com',
+      'https://main.d3jxjiafwm0rm4.amplifyapp.com',
       'http://localhost:5173',
       'http://localhost:5174',
     ],
@@ -115,11 +121,12 @@ new CfnOutput(stack, 'StreamingChatFunctionUrl', {
   description: 'Lambda Function URL for streaming chat',
 })
 
-// DynamoDB table permissions (no StreamChunk needed)
+// DynamoDB table permissions (no StreamChunk needed, added SavedData for RAG)
 const streamingTableMapping: Record<string, string> = {
   CHATSESSION_TABLE_NAME: 'ChatSession',
   CHATMESSAGE_TABLE_NAME: 'ChatMessage',
   THEME_TABLE_NAME: 'Theme',
+  SAVEDDATA_TABLE_NAME: 'SavedData',
 }
 
 for (const [envKey, modelName] of Object.entries(streamingTableMapping)) {
@@ -135,6 +142,10 @@ for (const [envKey, modelName] of Object.entries(streamingTableMapping)) {
   )
 }
 
+// Cognito env vars for JWT verification (dynamic)
+streamingLambda.addEnvironment('USER_POOL_ID', userPool.userPoolId)
+streamingLambda.addEnvironment('USER_POOL_CLIENT_ID', userPoolClient.ref)
+
 // Bedrock invoke permission
 streamingLambda.addToRolePolicy(
   new PolicyStatement({
@@ -145,7 +156,7 @@ streamingLambda.addToRolePolicy(
     ],
     resources: [
       'arn:aws:bedrock:*::foundation-model/anthropic.*',
-      'arn:aws:bedrock:us-west-2:338658063532:inference-profile/us.anthropic.*',
+      `arn:aws:bedrock:us-west-2:${accountId}:inference-profile/us.anthropic.*`,
     ],
   }),
 )
@@ -158,7 +169,7 @@ const ttsFnUrl = ttsLambda.addFunctionUrl({
   invokeMode: InvokeMode.BUFFERED,
   cors: {
     allowedOrigins: [
-      'https://main.d3dt9ir2fyc53u.amplifyapp.com',
+      'https://main.d3jxjiafwm0rm4.amplifyapp.com',
       'http://localhost:5173',
       'http://localhost:5174',
     ],
@@ -171,6 +182,10 @@ new CfnOutput(stack, 'TtsFunctionUrl', {
   value: ttsFnUrl.url,
   description: 'Lambda Function URL for TTS (Amazon Polly)',
 })
+
+// Cognito env vars for JWT verification (dynamic)
+ttsLambda.addEnvironment('USER_POOL_ID', userPool.userPoolId)
+ttsLambda.addEnvironment('USER_POOL_CLIENT_ID', userPoolClient.ref)
 
 // Polly permissions
 ttsLambda.addToRolePolicy(

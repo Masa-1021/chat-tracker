@@ -16,6 +16,7 @@ import { DataForm } from '@/features/data/components/DataForm'
 import { AdminDashboard } from '@/features/admin/components/AdminDashboard'
 import { UserList } from '@/features/admin/components/UserList'
 import { ThemeManager } from '@/features/admin/components/ThemeManager'
+import { AuditLogView } from '@/features/admin/components/AuditLogView'
 
 export function AppRoutes() {
   return (
@@ -45,6 +46,7 @@ export function AppRoutes() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<UserList />} />
             <Route path="/admin/themes" element={<ThemeManager />} />
+            <Route path="/admin/audit-log" element={<AuditLogView />} />
           </Route>
         </Route>
       </Route>

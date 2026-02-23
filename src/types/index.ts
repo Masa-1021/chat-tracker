@@ -1,12 +1,35 @@
+// ========== Organization ==========
+
+export type OrganizationPlan = 'FREE' | 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE'
+
+export interface Organization {
+  id: string
+  name: string
+  plan: OrganizationPlan
+  maxUsers: number
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
 // ========== User ==========
 
-export type UserRole = 'ADMIN' | 'MEMBER'
+export type UserRole =
+  | 'SUPER_ADMIN'
+  | 'ORG_ADMIN'
+  | 'MANAGER'
+  | 'OPERATOR'
+  | 'VIEWER'
+  // Legacy roles (backward compatible)
+  | 'ADMIN'
+  | 'MEMBER'
 
 export interface User {
   id: string
   email: string
   displayName: string
   role: UserRole
+  organizationId?: string
   language: string
   displayTheme: string
   createdAt: string
@@ -116,6 +139,29 @@ export interface EditHistory {
   timestamp: string
 }
 
+// ========== Audit Log ==========
+
+export type AuditAction =
+  | 'LOGIN' | 'LOGOUT' | 'LOGIN_FAILED'
+  | 'DATA_VIEW' | 'DATA_CREATE' | 'DATA_UPDATE' | 'DATA_DELETE' | 'DATA_EXPORT'
+  | 'USER_CREATE' | 'USER_UPDATE' | 'USER_DEACTIVATE'
+  | 'THEME_CREATE' | 'THEME_UPDATE' | 'THEME_DELETE'
+  | 'ADMIN_ACCESS'
+
+export type AuditResourceType = 'ChatSession' | 'SavedData' | 'Theme' | 'User' | 'Auth' | 'Organization'
+
+export interface AuditLog {
+  id: string
+  organizationId?: string
+  userId: string
+  userEmail: string
+  action: AuditAction
+  resourceType: AuditResourceType
+  resourceId?: string
+  metadata?: Record<string, string>
+  timestamp: string
+}
+
 // ========== Filters ==========
 
 export interface DataFilters {
@@ -129,3 +175,13 @@ export interface DataFilters {
   limit: number
   nextToken?: string
 }
+
+// ========== Permissions ==========
+
+export type Permission =
+  | 'chat:create' | 'chat:view_own' | 'chat:view_team' | 'chat:view_all'
+  | 'data:create' | 'data:edit_own' | 'data:edit_team' | 'data:edit_all' | 'data:delete' | 'data:export'
+  | 'theme:create' | 'theme:edit' | 'theme:delete'
+  | 'user:manage' | 'user:manage_org'
+  | 'admin:access' | 'admin:audit_log'
+  | 'org:manage'

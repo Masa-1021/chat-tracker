@@ -22,12 +22,25 @@ const schema = a.schema({
     .handler(a.handler.function(chatHandler))
     .authorization((allow) => [allow.authenticated()]),
 
+  // ========== Organization (Multi-tenant) ==========
+  Organization: a
+    .model({
+      name: a.string().required(),
+      plan: a.enum(['FREE', 'STARTER', 'PROFESSIONAL', 'ENTERPRISE']),
+      maxUsers: a.integer().default(5),
+      isActive: a.boolean().default(true),
+      createdAt: a.datetime(),
+      updatedAt: a.datetime(),
+    })
+    .authorization((allow) => [allow.authenticated()]),
+
   // ========== User ==========
   User: a
     .model({
       email: a.string().required(),
       displayName: a.string().required(),
-      role: a.enum(['ADMIN', 'MEMBER']),
+      role: a.enum(['SUPER_ADMIN', 'ORG_ADMIN', 'MANAGER', 'OPERATOR', 'VIEWER', 'ADMIN', 'MEMBER']),
+      organizationId: a.string(),
       language: a.string().default('ja'),
       displayTheme: a.string().default('system'),
       favoriteThemes: a.hasMany('FavoriteTheme', 'userId'),
@@ -147,6 +160,30 @@ const schema = a.schema({
     })
     .authorization((allow) => [allow.authenticated()])
     .secondaryIndexes((index) => [index('dataId').sortKeys(['timestamp'])]),
+
+  // ========== Audit Log ==========
+  AuditLog: a
+    .model({
+      organizationId: a.string(),
+      userId: a.string().required(),
+      userEmail: a.string().required(),
+      action: a.enum([
+        'LOGIN', 'LOGOUT', 'LOGIN_FAILED',
+        'DATA_VIEW', 'DATA_CREATE', 'DATA_UPDATE', 'DATA_DELETE', 'DATA_EXPORT',
+        'USER_CREATE', 'USER_UPDATE', 'USER_DEACTIVATE',
+        'THEME_CREATE', 'THEME_UPDATE', 'THEME_DELETE',
+        'ADMIN_ACCESS',
+      ]),
+      resourceType: a.enum(['ChatSession', 'SavedData', 'Theme', 'User', 'Auth', 'Organization']),
+      resourceId: a.string(),
+      metadata: a.json(),
+      timestamp: a.datetime().required(),
+    })
+    .authorization((allow) => [allow.authenticated()])
+    .secondaryIndexes((index) => [
+      index('userId').sortKeys(['timestamp']),
+      index('action').sortKeys(['timestamp']),
+    ]),
 })
 
 export type Schema = ClientSchema<typeof schema>
