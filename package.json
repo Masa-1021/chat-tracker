@@ -27,13 +27,16 @@
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.71.1",
     "react-router": "^7.13.0",
+    "recharts": "^3.7.0",
     "zod": "^4.3.6",
     "zustand": "^5.0.10"
   },
   "devDependencies": {
     "@aws-amplify/backend": "^1.20.0",
     "@aws-amplify/backend-cli": "^1.8.2",
+    "@aws-sdk/client-api-gateway": "^3.995.0",
     "@aws-sdk/client-bedrock-runtime": "^3.985.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.995.0",
     "@aws-sdk/client-dynamodb": "^3.985.0",
     "@aws-sdk/client-polly": "^3.989.0",
     "@aws-sdk/lib-dynamodb": "^3.985.0",

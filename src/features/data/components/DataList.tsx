@@ -2,17 +2,21 @@ import { useState, useMemo } from 'react'
 import { useSavedDataList, useDeleteSavedData } from '../hooks/useData'
 import { useThemeList } from '@/features/theme/hooks/useTheme'
 import { useAuthStore } from '@/features/auth/stores/authStore'
+import { isAdminRole } from '@/shared/utils/permissions'
 import { DataCard } from './DataCard'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
+import { exportToCsv } from '../utils/exportCsv'
 import type { SavedData } from '@/types'
 
 export function DataList() {
   const [themeFilter, setThemeFilter] = useState<string>('')
   const [keyword, setKeyword] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
   const user = useAuthStore((s) => s.user)
-  const isAdmin = user?.role === 'ADMIN'
+  const isAdmin = user ? isAdminRole(user.role) : false
 
   const filters = themeFilter ? { themeId: themeFilter } : undefined
   const { data: items, isLoading } = useSavedDataList(filters)
@@ -21,14 +25,32 @@ export function DataList() {
 
   const filtered = useMemo(() => {
     if (!items) return []
-    if (!keyword) return items
-    const lower = keyword.toLowerCase()
-    return items.filter(
-      (d: SavedData) =>
-        d.title.toLowerCase().includes(lower) ||
-        d.markdownContent.toLowerCase().includes(lower),
-    )
-  }, [items, keyword])
+
+    return items.filter((d: SavedData) => {
+      // Keyword filter
+      if (keyword) {
+        const lower = keyword.toLowerCase()
+        const matchesTitle = d.title.toLowerCase().includes(lower)
+        const matchesMarkdown = d.markdownContent.toLowerCase().includes(lower)
+        const matchesContent = Object.values(d.content).some((val) =>
+          String(val).toLowerCase().includes(lower),
+        )
+        if (!matchesTitle && !matchesMarkdown && !matchesContent) return false
+      }
+
+      // Date range filter
+      if (dateFrom) {
+        const createdDate = d.createdAt.slice(0, 10)
+        if (createdDate < dateFrom) return false
+      }
+      if (dateTo) {
+        const createdDate = d.createdAt.slice(0, 10)
+        if (createdDate > dateTo) return false
+      }
+
+      return true
+    })
+  }, [items, keyword, dateFrom, dateTo])
 
   const handleDelete = async () => {
     if (!deleteTarget) return
@@ -44,6 +66,15 @@ export function DataList() {
     <div className="data-list-container">
       <div className="page-header">
         <h1>保存データ</h1>
+        <button
+          type="button"
+          className="data-export-btn"
+          onClick={() => exportToCsv(filtered, themes ?? [])}
+          disabled={filtered.length === 0}
+          aria-label="表示中のデータをCSV形式でエクスポート"
+        >
+          CSVエクスポート
+        </button>
       </div>
 
       <div className="data-filters">
@@ -68,7 +99,30 @@ export function DataList() {
             </option>
           ))}
         </select>
+        <div className="data-date-range">
+          <input
+            type="date"
+            className="data-date-input"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            aria-label="開始日"
+            title="開始日"
+          />
+          <span className="data-date-separator" aria-hidden="true">〜</span>
+          <input
+            type="date"
+            className="data-date-input"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            aria-label="終了日"
+            title="終了日"
+          />
+        </div>
       </div>
+
+      <p className="data-result-count">
+        {filtered.length} 件表示中
+      </p>
 
       <div className="data-grid">
         {filtered.map((d) => (

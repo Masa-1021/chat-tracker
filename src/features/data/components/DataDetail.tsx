@@ -7,6 +7,7 @@ import {
   useEditHistory,
 } from '../hooks/useData'
 import { useAuthStore } from '@/features/auth/stores/authStore'
+import { isAdminRole } from '@/shared/utils/permissions'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { renderMarkdown } from '@/shared/utils/markdown'
 import { formatRelativeTime } from '@/shared/utils/date'
@@ -24,7 +25,7 @@ export function DataDetail() {
   const [showHistory, setShowHistory] = useState(false)
 
   const canDelete =
-    user?.role === 'ADMIN' || data?.createdBy === user?.id
+    (user ? isAdminRole(user.role) : false) || data?.createdBy === user?.id
 
   const handleDelete = async () => {
     if (!id) return

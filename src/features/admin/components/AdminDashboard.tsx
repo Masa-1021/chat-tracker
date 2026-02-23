@@ -3,6 +3,7 @@ import { SerendieSymbolGroup, SerendieSymbolTag } from '@serendie/symbols'
 import { useUserList } from '../hooks/useAdmin'
 import { useThemeList } from '@/features/theme/hooks/useTheme'
 import { useSavedDataList } from '@/features/data/hooks/useData'
+import { DashboardCharts } from './DashboardCharts'
 
 export function AdminDashboard() {
   const { data: users } = useUserList()
@@ -51,6 +52,12 @@ export function AdminDashboard() {
           </Link>
         ))}
       </div>
+
+      <DashboardCharts
+        savedData={savedData ?? []}
+        themes={themes ?? []}
+        users={users ?? []}
+      />
     </div>
   )
 }
