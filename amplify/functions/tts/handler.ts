@@ -136,7 +136,7 @@ const DEFAULT_VOICE = VoiceId.Kazuha
 
 // --- Main Handler ---
 
-const pollyClient = new PollyClient({ region: 'us-west-2' })
+const pollyClient = new PollyClient({ region: process.env.AWS_REGION ?? 'us-east-1' })
 
 export const handler = async (event: FunctionUrlEvent) => {
   const responseHeaders: Record<string, string> = {

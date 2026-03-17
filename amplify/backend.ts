@@ -74,7 +74,7 @@ chatLambda.addToRolePolicy(
     ],
     resources: [
       'arn:aws:bedrock:*::foundation-model/anthropic.*',
-      `arn:aws:bedrock:us-west-2:${accountId}:inference-profile/us.anthropic.*`,
+      `arn:aws:bedrock:us-east-1:${accountId}:inference-profile/us.anthropic.*`,
     ],
   }),
 )
@@ -156,7 +156,7 @@ streamingLambda.addToRolePolicy(
     ],
     resources: [
       'arn:aws:bedrock:*::foundation-model/anthropic.*',
-      `arn:aws:bedrock:us-west-2:${accountId}:inference-profile/us.anthropic.*`,
+      `arn:aws:bedrock:us-east-1:${accountId}:inference-profile/us.anthropic.*`,
     ],
   }),
 )

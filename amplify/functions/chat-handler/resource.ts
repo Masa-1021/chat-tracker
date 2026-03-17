@@ -8,7 +8,7 @@ export const chatHandler = defineFunction({
   resourceGroupName: 'data',
   environment: {
     BEDROCK_MODEL_ID: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
-    BEDROCK_REGION: 'us-west-2',
+    BEDROCK_REGION: 'us-east-1',
     BEDROCK_MAX_TOKENS: '4096',
   },
 })
