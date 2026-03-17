@@ -1,9 +1,9 @@
 {
   "auth": {
-    "user_pool_id": "ap-northeast-1_2iVTrqABE",
-    "aws_region": "ap-northeast-1",
-    "user_pool_client_id": "1jb5sufiovdr5mhvj8vh9imcnt",
-    "identity_pool_id": "ap-northeast-1:ec3338fd-726f-41d4-a19f-71f4d58708eb",
+    "user_pool_id": "us-west-2_YgOpu9oTh",
+    "aws_region": "us-west-2",
+    "user_pool_client_id": "1hunslompdq6l6t55jracqbnr0",
+    "identity_pool_id": "us-west-2:f95b4d96-0971-48ac-8cb3-0e4e52c5faee",
     "mfa_methods": [],
     "standard_required_attributes": [
       "email"
@@ -26,8 +26,8 @@
     "unauthenticated_identities_enabled": true
   },
   "data": {
-    "url": "https://vd7u7bpelzhixoyaj7josmnbva.appsync-api.ap-northeast-1.amazonaws.com/graphql",
-    "aws_region": "ap-northeast-1",
+    "url": "https://tdklltdfingwlmwigttkskftn4.appsync-api.us-west-2.amazonaws.com/graphql",
+    "aws_region": "us-west-2",
     "default_authorization_type": "AMAZON_COGNITO_USER_POOLS",
     "authorization_types": [
       "AWS_IAM"
@@ -1444,13 +1444,13 @@
     }
   },
   "storage": {
-    "aws_region": "ap-northeast-1",
-    "bucket_name": "amplify-chattracker-masat-chattrackerstoragebucket-p9xn72ijyjyq",
+    "aws_region": "us-west-2",
+    "bucket_name": "amplify-chattracker-dw358-chattrackerstoragebucket-vlvarhamywtv",
     "buckets": [
       {
         "name": "chatTrackerStorage",
-        "bucket_name": "amplify-chattracker-masat-chattrackerstoragebucket-p9xn72ijyjyq",
-        "aws_region": "ap-northeast-1",
+        "bucket_name": "amplify-chattracker-dw358-chattrackerstoragebucket-vlvarhamywtv",
+        "aws_region": "us-west-2",
         "paths": {
           "public/default/*": {
             "guest": [
