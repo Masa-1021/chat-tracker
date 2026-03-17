@@ -156,7 +156,7 @@ function ThemePieCard({ data }: PieChartCardProps) {
               cy="50%"
               outerRadius={90}
               label={({ name, percent }) =>
-                `${name} ${(percent * 100).toFixed(0)}%`
+                `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
               }
               labelLine={false}
             >
@@ -167,7 +167,7 @@ function ThemePieCard({ data }: PieChartCardProps) {
                 />
               ))}
             </Pie>
-            <Tooltip formatter={(value: number) => [`${value}件`, '件数']} />
+            <Tooltip formatter={(value: number) => [`${value}件`, '件数'] as [string, string]} />
             <Legend />
           </PieChart>
         </ResponsiveContainer>
@@ -201,7 +201,7 @@ function DailyTrendCard({ data }: LineChartCardProps) {
               tick={{ fontSize: 11 }}
               width={32}
             />
-            <Tooltip formatter={(value: number) => [`${value}件`, '登録件数']} />
+            <Tooltip formatter={(value: number) => [`${value}件`, '登録件数'] as [string, string]} />
             <Line
               type="monotone"
               dataKey="count"
@@ -242,7 +242,7 @@ function UserRankingCard({ data }: BarChartCardProps) {
               tick={{ fontSize: 12 }}
               width={96}
             />
-            <Tooltip formatter={(value: number) => [`${value}件`, '保存件数']} />
+            <Tooltip formatter={(value: number) => [`${value}件`, '保存件数'] as [string, string]} />
             <Bar dataKey="count" radius={[0, 4, 4, 0]}>
               {data.map((_, index) => (
                 <Cell

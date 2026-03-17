@@ -54,7 +54,7 @@ export function ThemeForm() {
   const createTheme = useCreateTheme()
   const updateTheme = useUpdateTheme()
 
-  const initial = resolveInitialValues(templateId, existingTheme, isEdit)
+  const initial = resolveInitialValues(templateId, existingTheme ?? undefined, isEdit)
 
   const [name, setName] = useState(initial.name)
   const [fields, setFields] = useState<ThemeField[]>(initial.fields)
