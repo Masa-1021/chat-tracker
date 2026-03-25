@@ -2,11 +2,11 @@ import { useState, useCallback, useRef } from 'react'
 import { fetchAuthSession } from 'aws-amplify/auth'
 import { useQueryClient } from '@tanstack/react-query'
 import type { ChatMessage } from '@/types'
-import amplifyOutputs from '/amplify_outputs.json'
 
-const STREAMING_URL: string =
-  (amplifyOutputs as Record<string, Record<string, string>>).custom?.streamingChatUrl ||
-  import.meta.env.VITE_STREAMING_CHAT_URL
+const _outputs = import.meta.glob('/amplify_outputs.json', { eager: true })
+const _custom = (_outputs['/amplify_outputs.json'] as Record<string, Record<string, string>> | undefined)?.custom
+
+const STREAMING_URL: string = _custom?.streamingChatUrl || import.meta.env.VITE_STREAMING_CHAT_URL
 
 interface NdjsonTextChunk {
   type: 'text'
