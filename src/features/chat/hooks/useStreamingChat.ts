@@ -5,8 +5,8 @@ import type { ChatMessage } from '@/types'
 import amplifyOutputs from '/amplify_outputs.json'
 
 const STREAMING_URL: string =
-  import.meta.env.VITE_STREAMING_CHAT_URL ||
-  (amplifyOutputs as Record<string, Record<string, string>>).custom?.streamingChatUrl
+  (amplifyOutputs as Record<string, Record<string, string>>).custom?.streamingChatUrl ||
+  import.meta.env.VITE_STREAMING_CHAT_URL
 
 interface NdjsonTextChunk {
   type: 'text'
