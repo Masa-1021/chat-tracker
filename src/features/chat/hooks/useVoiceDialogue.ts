@@ -89,7 +89,10 @@ export function useVoiceDialogue(
   const sendMessageRef = useRef(sendMessage)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const startListeningRef = useRef<() => void>(() => {})
-  sendMessageRef.current = sendMessage
+
+  useEffect(() => {
+    sendMessageRef.current = sendMessage
+  })
 
   const isSupported = getSpeechRecognition() !== null && !!TTS_URL
 
@@ -181,7 +184,9 @@ export function useVoiceDialogue(
     updatePhase('listening')
   }, [clearSilenceTimer, updatePhase])
 
-  startListeningRef.current = startListening
+  useEffect(() => {
+    startListeningRef.current = startListening
+  }, [startListening])
 
   // Track streamed content for TTS
   useEffect(() => {
