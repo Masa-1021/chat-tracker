@@ -88,6 +88,7 @@ export function useVoiceDialogue(
   const lastContentRef = useRef('')
   const sendMessageRef = useRef(sendMessage)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const startListeningRef = useRef<() => void>(() => {})
   sendMessageRef.current = sendMessage
 
   const isSupported = getSpeechRecognition() !== null && !!TTS_URL
@@ -172,13 +173,15 @@ export function useVoiceDialogue(
         sendMessageRef.current(text)
       } else {
         // No speech detected, restart
-        startListening()
+        startListeningRef.current()
       }
     }
 
     recognition.start()
     updatePhase('listening')
   }, [clearSilenceTimer, updatePhase])
+
+  startListeningRef.current = startListening
 
   // Track streamed content for TTS
   useEffect(() => {
@@ -207,7 +210,7 @@ export function useVoiceDialogue(
         audio.addEventListener('ended', () => {
           audioRef.current = null
           if (phaseRef.current === 'speaking') {
-            startListening()
+            startListeningRef.current()
           }
         }, { once: true })
 
@@ -215,7 +218,7 @@ export function useVoiceDialogue(
           audioRef.current = null
           console.error('Audio playback error')
           if (phaseRef.current === 'speaking') {
-            startListening()
+            startListeningRef.current()
           }
         }, { once: true })
 
@@ -223,7 +226,7 @@ export function useVoiceDialogue(
           console.error('Audio play failed:', err)
           audioRef.current = null
           if (phaseRef.current === 'speaking') {
-            startListening()
+            startListeningRef.current()
           }
         })
       })
@@ -231,10 +234,10 @@ export function useVoiceDialogue(
         console.error('Polly TTS error:', err)
         // Fallback: skip speaking and go back to listening
         if (phaseRef.current === 'speaking') {
-          startListening()
+          startListeningRef.current()
         }
       })
-  }, [isStreaming, updatePhase, startListening, voiceId])
+  }, [isStreaming, updatePhase, voiceId])
 
   const start = useCallback(() => {
     setAiResponse('')
