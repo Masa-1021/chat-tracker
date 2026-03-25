@@ -1480,5 +1480,8 @@
       }
     ]
   },
-  "version": "1.4"
+  "version": "1.4",
+  "custom": {
+    "streamingChatUrl": "https://e2idbzanhxjm6guqiin7gllcyq0yqfit.lambda-url.us-east-1.on.aws/"
+  }
 }
