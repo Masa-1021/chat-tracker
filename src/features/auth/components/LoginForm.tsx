@@ -5,6 +5,11 @@ import { useAuth } from '../hooks/useAuth'
 import { AuthLayout } from './AuthLayout'
 import { ROUTES } from '@/shared/constants/config'
 
+const SAMPLE_USER = {
+  email: 'demo@chat-tracker.sample',
+  password: 'DemoUser1!',
+}
+
 export function LoginForm() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -19,18 +24,11 @@ export function LoginForm() {
     (location.state as { from?: { pathname: string } } | null)?.from
       ?.pathname ?? ROUTES.home
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
+  const doSignIn = async (signInEmail: string, signInPassword: string) => {
     setError('')
-
-    if (!email || !password) {
-      setError('メールアドレスとパスワードを入力してください。')
-      return
-    }
-
     setIsSubmitting(true)
     try {
-      const result = await signIn(email, password)
+      const result = await signIn(signInEmail, signInPassword)
 
       if (result.nextStep.signInStep === 'DONE') {
         navigate(from, { replace: true })
@@ -44,6 +42,20 @@ export function LoginForm() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+
+    if (!email || !password) {
+      setError('メールアドレスとパスワードを入力してください。')
+      return
+    }
+    await doSignIn(email, password)
+  }
+
+  const handleSampleLogin = async () => {
+    await doSignIn(SAMPLE_USER.email, SAMPLE_USER.password)
   }
 
   return (
@@ -84,6 +96,24 @@ export function LoginForm() {
         >
           {isSubmitting ? 'ログイン中...' : 'ログイン'}
         </Button>
+
+        <div className="auth-sample-divider">
+          <span>または</span>
+        </div>
+
+        <Button
+          styleType="outlined"
+          type="button"
+          onClick={handleSampleLogin}
+          disabled={isSubmitting}
+          style={{ width: '100%' }}
+        >
+          サンプルユーザーで試す
+        </Button>
+        <p className="auth-sample-note">
+          気軽に動作を確認できるデモアカウントでログインします
+        </p>
+
         <div className="auth-links">
           <Link to={ROUTES.passwordReset}>パスワードをお忘れですか？</Link>
           <Link to={ROUTES.register}>アカウント作成</Link>
