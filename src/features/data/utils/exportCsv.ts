@@ -77,18 +77,6 @@ export function exportToCsv(
   filename?: string,
   onExported?: () => void,
 ): void {
-  // Debug: log input sizes to help diagnose missing user/theme resolution
-  // eslint-disable-next-line no-console
-  console.log('[CSV] data:', data.length, 'themes:', themes.length, 'users:', users.length)
-  if (users.length > 0) {
-    // eslint-disable-next-line no-console
-    console.log('[CSV] sample user:', users[0])
-  }
-  if (data.length > 0) {
-    // eslint-disable-next-line no-console
-    console.log('[CSV] sample createdBy:', data[0].createdBy)
-  }
-
   const themeMap = new Map<string, Theme>(themes.map((t) => [t.id, t]))
   const userMap = new Map<string, User>(users.map((u) => [u.id, u]))
   const fields = collectFields(data, themes)

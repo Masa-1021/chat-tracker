@@ -24,10 +24,12 @@ export function useUserList() {
     queryFn: async () => {
       const client = getAmplifyClient()
       const { data, errors } = await client.models.User.list()
-      // eslint-disable-next-line no-console
-      console.log('[useUserList] data count:', data?.length, 'errors:', errors, 'first:', data?.[0])
-      if (errors) throw new Error(errors[0].message)
-      return data.map((item) => mapUser(item as Record<string, unknown>))
+      // Partial results: GraphQL may return `errors` alongside valid `data`
+      // (e.g. nullable fields unresolved). Only fail when no data at all.
+      if (errors && (!data || data.length === 0)) {
+        throw new Error(errors[0].message)
+      }
+      return (data ?? []).map((item) => mapUser(item as Record<string, unknown>))
     },
   })
 }
