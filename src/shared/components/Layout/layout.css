@@ -1489,16 +1489,19 @@
   padding: 24px 28px;
 }
 
-.data-detail-content h1 {
+.data-detail-content h1,
+.data-detail-content h2 {
   font-size: 20px;
   font-weight: 700;
   margin: 0 0 16px;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--colors-sd-system-color-component-outline-bright);
   color: var(--colors-sd-system-color-component-on-surface);
+  background: transparent;
+  display: block;
 }
 
-.data-detail-content h2 {
+.data-detail-content h3 {
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -1510,7 +1513,8 @@
   border-radius: 4px;
 }
 
-.data-detail-content h2:first-of-type {
+.data-detail-content h3:first-of-type,
+.data-detail-content > h3:first-child {
   margin-top: 0;
 }
 
