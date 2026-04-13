@@ -1,4 +1,4 @@
-import type { SavedData, Theme, User } from '@/types'
+import type { SavedData, Theme, ThemeField, User } from '@/types'
 
 /**
  * Escape a single CSV field value per RFC 4180:
@@ -13,13 +13,13 @@ function escapeCsvField(value: string | number | null | undefined): string {
 }
 
 /**
- * Build an ordered list of all unique field names from the themes present in the data.
- * The union is ordered by: first appearance across themes sorted by theme name.
+ * Collect all unique fields across themes in the data.
+ * Uniqueness is by field name (first occurrence wins).
  */
-function collectFieldNames(data: SavedData[], themes: Theme[]): string[] {
+function collectFields(data: SavedData[], themes: Theme[]): ThemeField[] {
   const themeMap = new Map<string, Theme>(themes.map((t) => [t.id, t]))
   const seen = new Set<string>()
-  const fieldNames: string[] = []
+  const fields: ThemeField[] = []
 
   for (const item of data) {
     const theme = themeMap.get(item.themeId)
@@ -28,12 +28,12 @@ function collectFieldNames(data: SavedData[], themes: Theme[]): string[] {
     for (const field of sorted) {
       if (!seen.has(field.name)) {
         seen.add(field.name)
-        fieldNames.push(field.name)
+        fields.push(field)
       }
     }
   }
 
-  return fieldNames
+  return fields
 }
 
 /**
@@ -79,12 +79,12 @@ export function exportToCsv(
 ): void {
   const themeMap = new Map<string, Theme>(themes.map((t) => [t.id, t]))
   const userMap = new Map<string, User>(users.map((u) => [u.id, u]))
-  const fieldNames = collectFieldNames(data, themes)
+  const fields = collectFields(data, themes)
 
   // Build header row
   const fixedHeaders = ['タイトル', 'テーマ名']
   const fixedTailHeaders = ['作成者', '作成日時', '更新日時']
-  const headers = [...fixedHeaders, ...fieldNames, ...fixedTailHeaders]
+  const headers = [...fixedHeaders, ...fields.map((f) => f.name), ...fixedTailHeaders]
   const headerRow = headers.map(escapeCsvField).join(',')
 
   // Build data rows
@@ -96,8 +96,9 @@ export function exportToCsv(
 
     const fixedCells = [item.title, themeName]
 
-    const dynamicCells = fieldNames.map((fieldName) => {
-      const val = item.content[fieldName]
+    const dynamicCells = fields.map((field) => {
+      // content は通常 field.id をキーとするが、過去データ互換で name も試す
+      const val = item.content[field.id] ?? item.content[field.name]
       return val !== undefined ? val : ''
     })
 
