@@ -2074,7 +2074,7 @@
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 4px;
-  background: var(--colors-sd-system-color-impression-primary-container);
+  background: var(--colors-sd-system-color-impression-tertiary);
   color: var(--colors-sd-system-color-impression-primary);
   white-space: nowrap;
 }
