@@ -319,9 +319,27 @@ export const handler = awslambda.streamifyResponse(
         fullContent,
       })
 
-      // 7. Save assistant message & update session (fire-and-forget for stream speed)
+      // 7. Detect <SAVE_DATA> marker → persist SavedData
+      const saveResult = extractSaveData(fullContent)
+      const cleanedContent = saveResult.cleanedText
+      if (saveResult.payload) {
+        try {
+          await createSavedData({
+            themeId: session.themeId,
+            sessionId,
+            createdBy: userId,
+            title: saveResult.payload.title,
+            content: saveResult.payload.content,
+            theme,
+          })
+        } catch (saveErr) {
+          console.error('SavedData create failed:', saveErr)
+        }
+      }
+
+      // 8. Save assistant message & update session
       await Promise.all([
-        saveMessage(sessionId, 'ASSISTANT', fullContent),
+        saveMessage(sessionId, 'ASSISTANT', cleanedContent),
         dynamoClient.send(
           new UpdateCommand({
             TableName: getEnv('CHATSESSION_TABLE_NAME'),
@@ -336,7 +354,7 @@ export const handler = awslambda.streamifyResponse(
         ),
       ])
 
-      // 8. Auto-generate title
+      // 9. Auto-generate title
       if (!session.titleLocked && (session.messageCount ?? 0) < 5) {
         const allMessages = [
           ...messages.map((m: Record<string, string>) => ({
@@ -344,7 +362,7 @@ export const handler = awslambda.streamifyResponse(
             content: m.content,
           })),
           { role: 'USER', content },
-          { role: 'ASSISTANT', content: fullContent },
+          { role: 'ASSISTANT', content: cleanedContent },
         ]
         await updateSessionTitle(sessionId, allMessages, session.messageCount + 2)
       }
@@ -441,6 +459,108 @@ async function getMessages(sessionId: string) {
     }),
   )
   return (Items ?? []) as Array<Record<string, string>>
+}
+
+// --- SAVE_DATA marker extraction & SavedData persistence ---
+
+interface SaveDataPayload {
+  title: string
+  content: Record<string, string>
+}
+
+interface ExtractResult {
+  payload: SaveDataPayload | null
+  cleanedText: string
+}
+
+const SAVE_DATA_RE = /<SAVE_DATA>\s*([\s\S]*?)\s*<\/SAVE_DATA>/
+
+function extractSaveData(text: string): ExtractResult {
+  const match = text.match(SAVE_DATA_RE)
+  if (!match) return { payload: null, cleanedText: text }
+  const cleanedText = text.replace(SAVE_DATA_RE, '').trim()
+  try {
+    const parsed = JSON.parse(match[1]) as Partial<SaveDataPayload>
+    if (
+      typeof parsed.title === 'string' &&
+      parsed.content &&
+      typeof parsed.content === 'object'
+    ) {
+      // 値を文字列化（数値などが入る可能性に備える）
+      const stringContent: Record<string, string> = {}
+      for (const [k, v] of Object.entries(parsed.content)) {
+        stringContent[k] = v == null ? '' : String(v)
+      }
+      return {
+        payload: { title: parsed.title.slice(0, 100), content: stringContent },
+        cleanedText,
+      }
+    }
+  } catch (err) {
+    console.error('Failed to parse SAVE_DATA JSON:', err, match[1])
+  }
+  return { payload: null, cleanedText }
+}
+
+function buildMarkdownContent(
+  themeFields: ThemeField[],
+  content: Record<string, string>,
+  title: string,
+): string {
+  const lines: string[] = [`# ${title}`, '']
+  const sorted = [...themeFields].sort((a, b) => a.order - b.order)
+  for (const f of sorted) {
+    const val = content[f.id]
+    if (val !== undefined && val !== '') {
+      lines.push(`## ${f.name}`, '', String(val), '')
+    }
+  }
+  return lines.join('\n')
+}
+
+async function createSavedData(args: {
+  themeId: string
+  sessionId: string
+  createdBy: string
+  title: string
+  content: Record<string, string>
+  theme: Record<string, unknown>
+}): Promise<void> {
+  const tableName = process.env.SAVEDDATA_TABLE_NAME
+  if (!tableName) {
+    console.error('SAVEDDATA_TABLE_NAME is not set; cannot persist SavedData')
+    return
+  }
+
+  const themeFields: ThemeField[] =
+    typeof args.theme.fields === 'string'
+      ? JSON.parse(args.theme.fields as string)
+      : (args.theme.fields as ThemeField[])
+
+  const id = generateId()
+  const now = new Date().toISOString()
+  const markdownContent = buildMarkdownContent(themeFields, args.content, args.title)
+
+  await dynamoClient.send(
+    new PutCommand({
+      TableName: tableName,
+      Item: {
+        __typename: 'SavedData',
+        id,
+        themeId: args.themeId,
+        sessionId: args.sessionId,
+        title: args.title,
+        content: JSON.stringify(args.content),
+        markdownContent,
+        images: [],
+        createdBy: args.createdBy,
+        isDeleted: false,
+        createdAt: now,
+        updatedAt: now,
+      },
+    }),
+  )
+  console.log('SavedData created:', { id, title: args.title, themeId: args.themeId })
 }
 
 async function saveMessage(
