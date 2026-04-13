@@ -1507,7 +1507,8 @@
   letter-spacing: 0.04em;
   margin: 20px 0 6px;
   padding: 4px 10px;
-  display: inline-block;
+  display: block;
+  width: fit-content;
   background: var(--colors-sd-system-color-impression-tertiary);
   color: var(--colors-sd-system-color-impression-primary);
   border-radius: 4px;
