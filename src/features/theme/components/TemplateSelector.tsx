@@ -75,7 +75,7 @@ export function TemplateSelector({ isOpen, onSelect, onClose }: TemplateSelector
               aria-label={`${template.name}テンプレートを選択`}
             >
               <div className="template-card-icon" aria-hidden="true">
-                {template.icon}
+                <template.icon width={32} height={32} />
               </div>
               <div className="template-card-body">
                 <div className="template-card-header">

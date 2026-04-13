@@ -1,689 +1,195 @@
+import type { ComponentType, SVGProps } from 'react'
+import {
+  SerendieSymbolStickyNote,
+  SerendieSymbolArticle,
+  SerendieSymbolChatRectangle,
+  SerendieSymbolLightning,
+  SerendieSymbolCheckSquare,
+  SerendieSymbolTool,
+  SerendieSymbolAlertCircle,
+  SerendieSymbolAlertTriangle,
+} from '@serendie/symbols'
 import type { ThemeField } from '@/types'
+
+type SerendieIcon = ComponentType<SVGProps<SVGSVGElement>>
 
 export interface ThemeTemplate {
   id: string
   name: string
   description: string
   industry: string
-  icon: string
+  icon: SerendieIcon
   fields: ThemeField[]
 }
 
-// ---- 設備故障・トラブル報告 ----
+// ============================================================
+// 汎用テンプレート
+// ============================================================
 
-const TROUBLE_FIELDS: ThemeField[] = [
+const MEMO_FIELDS: ThemeField[] = [
+  { id: 'tpl-memo-01', name: 'タイトル', type: 'TEXT', required: true, options: null, order: 1 },
+  { id: 'tpl-memo-02', name: '内容', type: 'TEXTAREA', required: true, options: null, order: 2 },
+  { id: 'tpl-memo-03', name: 'タグ', type: 'TEXT', required: false, options: null, order: 3 },
+]
+
+const DAILY_REPORT_FIELDS: ThemeField[] = [
+  { id: 'tpl-daily-01', name: '日付', type: 'DATE', required: true, options: null, order: 1 },
+  { id: 'tpl-daily-02', name: 'やったこと', type: 'TEXTAREA', required: true, options: null, order: 2 },
+  { id: 'tpl-daily-03', name: '課題・気づき', type: 'TEXTAREA', required: false, options: null, order: 3 },
+  { id: 'tpl-daily-04', name: '明日の予定', type: 'TEXTAREA', required: false, options: null, order: 4 },
+]
+
+const MINUTES_FIELDS: ThemeField[] = [
+  { id: 'tpl-minutes-01', name: '日時', type: 'DATETIME', required: true, options: null, order: 1 },
+  { id: 'tpl-minutes-02', name: '参加者', type: 'TEXT', required: true, options: null, order: 2 },
+  { id: 'tpl-minutes-03', name: '議題', type: 'TEXTAREA', required: true, options: null, order: 3 },
+  { id: 'tpl-minutes-04', name: '決定事項', type: 'TEXTAREA', required: true, options: null, order: 4 },
+  { id: 'tpl-minutes-05', name: '次アクション', type: 'TEXTAREA', required: false, options: null, order: 5 },
+]
+
+const IDEA_FIELDS: ThemeField[] = [
+  { id: 'tpl-idea-01', name: 'タイトル', type: 'TEXT', required: true, options: null, order: 1 },
+  { id: 'tpl-idea-02', name: '内容', type: 'TEXTAREA', required: true, options: null, order: 2 },
+  { id: 'tpl-idea-03', name: 'カテゴリ', type: 'TEXT', required: false, options: null, order: 3 },
   {
-    id: 'c3d4e5f6-a7b8-9012-cdef-123456789001',
-    name: '発生日時',
-    type: 'DATETIME',
-    required: true,
-    options: null,
-    order: 1,
-  },
-  {
-    id: 'c3d4e5f6-a7b8-9012-cdef-123456789002',
-    name: '設備名',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 2,
-  },
-  {
-    id: 'c3d4e5f6-a7b8-9012-cdef-123456789003',
-    name: '設備番号',
-    type: 'TEXT',
+    id: 'tpl-idea-04',
+    name: '優先度',
+    type: 'SELECT',
     required: false,
-    options: null,
+    options: ['高', '中', '低'],
+    order: 4,
+  },
+]
+
+const TASK_FIELDS: ThemeField[] = [
+  { id: 'tpl-task-01', name: 'タイトル', type: 'TEXT', required: true, options: null, order: 1 },
+  { id: 'tpl-task-02', name: '期限', type: 'DATE', required: false, options: null, order: 2 },
+  {
+    id: 'tpl-task-03',
+    name: '優先度',
+    type: 'SELECT',
+    required: false,
+    options: ['高', '中', '低'],
     order: 3,
   },
   {
-    id: 'c3d4e5f6-a7b8-9012-cdef-123456789004',
-    name: '故障分類',
+    id: 'tpl-task-04',
+    name: 'ステータス',
     type: 'SELECT',
     required: true,
-    options: ['機械故障', '電気故障', '計装故障', 'ユーティリティ', 'その他'],
+    options: ['未着手', '進行中', '完了'],
     order: 4,
   },
+]
+
+// ============================================================
+// 製造業テンプレート
+// ============================================================
+
+const TROUBLE_FIELDS: ThemeField[] = [
+  { id: 'tpl-trouble-01', name: '発生日時', type: 'DATETIME', required: true, options: null, order: 1 },
+  { id: 'tpl-trouble-02', name: '設備名', type: 'TEXT', required: true, options: null, order: 2 },
+  { id: 'tpl-trouble-03', name: '症状・状況', type: 'TEXTAREA', required: true, options: null, order: 3 },
+  { id: 'tpl-trouble-04', name: '対処内容', type: 'TEXTAREA', required: true, options: null, order: 4 },
   {
-    id: 'c3d4e5f6-a7b8-9012-cdef-123456789005',
-    name: '重要度',
-    type: 'SELECT',
-    required: true,
-    options: ['緊急', '重要', '通常', '軽微'],
-    order: 5,
-  },
-  {
-    id: 'c3d4e5f6-a7b8-9012-cdef-123456789006',
-    name: '症状・状況',
-    type: 'TEXTAREA',
-    required: true,
-    options: null,
-    order: 6,
-  },
-  {
-    id: 'c3d4e5f6-a7b8-9012-cdef-123456789007',
-    name: '原因（推定）',
-    type: 'TEXTAREA',
-    required: false,
-    options: null,
-    order: 7,
-  },
-  {
-    id: 'c3d4e5f6-a7b8-9012-cdef-123456789008',
-    name: '対処内容',
-    type: 'TEXTAREA',
-    required: true,
-    options: null,
-    order: 8,
-  },
-  {
-    id: 'c3d4e5f6-a7b8-9012-cdef-123456789009',
+    id: 'tpl-trouble-05',
     name: '復旧状況',
     type: 'SELECT',
     required: true,
-    options: ['復旧済み', '仮復旧', '未復旧', '部品待ち'],
-    order: 9,
-  },
-  {
-    id: 'c3d4e5f6-a7b8-9012-cdef-123456789010',
-    name: '停止時間（分）',
-    type: 'NUMBER',
-    required: false,
-    options: null,
-    order: 10,
-  },
-  {
-    id: 'c3d4e5f6-a7b8-9012-cdef-123456789011',
-    name: '報告者名',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 11,
-  },
-]
-
-// ---- 品質不良・不適合報告 ----
-
-const QUALITY_DEFECT_FIELDS: ThemeField[] = [
-  {
-    id: 'd4e5f6a7-b8c9-0123-defa-234567890001',
-    name: '発生日',
-    type: 'DATE',
-    required: true,
-    options: null,
-    order: 1,
-  },
-  {
-    id: 'd4e5f6a7-b8c9-0123-defa-234567890002',
-    name: '製品名・品番',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 2,
-  },
-  {
-    id: 'd4e5f6a7-b8c9-0123-defa-234567890003',
-    name: 'ロット番号',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 3,
-  },
-  {
-    id: 'd4e5f6a7-b8c9-0123-defa-234567890004',
-    name: '不良分類',
-    type: 'SELECT',
-    required: true,
-    options: ['寸法不良', '外観不良', '機能不良', '材料不良', '混入', 'その他'],
-    order: 4,
-  },
-  {
-    id: 'd4e5f6a7-b8c9-0123-defa-234567890005',
-    name: '不良数量',
-    type: 'NUMBER',
-    required: true,
-    options: null,
+    options: ['復旧完了', '仮復旧', '未復旧'],
     order: 5,
   },
-  {
-    id: 'd4e5f6a7-b8c9-0123-defa-234567890006',
-    name: '不良内容・現象',
-    type: 'TEXTAREA',
-    required: true,
-    options: null,
-    order: 6,
-  },
-  {
-    id: 'd4e5f6a7-b8c9-0123-defa-234567890007',
-    name: '発生工程',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 7,
-  },
-  {
-    id: 'd4e5f6a7-b8c9-0123-defa-234567890008',
-    name: '推定原因（なぜなぜ）',
-    type: 'TEXTAREA',
-    required: true,
-    options: null,
-    order: 8,
-  },
-  {
-    id: 'd4e5f6a7-b8c9-0123-defa-234567890009',
-    name: '暫定処置',
-    type: 'TEXTAREA',
-    required: true,
-    options: null,
-    order: 9,
-  },
-  {
-    id: 'd4e5f6a7-b8c9-0123-defa-234567890010',
-    name: '恒久対策',
-    type: 'TEXTAREA',
-    required: false,
-    options: null,
-    order: 10,
-  },
-  {
-    id: 'd4e5f6a7-b8c9-0123-defa-234567890011',
-    name: '処置区分',
-    type: 'SELECT',
-    required: true,
-    options: ['選別', '手直し', '廃棄', '特採', '返品'],
-    order: 11,
-  },
-  {
-    id: 'd4e5f6a7-b8c9-0123-defa-234567890012',
-    name: '報告者名',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 12,
-  },
+  { id: 'tpl-trouble-06', name: '報告者名', type: 'TEXT', required: true, options: null, order: 6 },
 ]
 
-// ---- 4M変更管理記録 ----
-
-const CHANGE_MANAGEMENT_FIELDS: ThemeField[] = [
-  {
-    id: 'e5f6a7b8-c9d0-1234-efab-345678901001',
-    name: '変更申請日',
-    type: 'DATE',
-    required: true,
-    options: null,
-    order: 1,
-  },
-  {
-    id: 'e5f6a7b8-c9d0-1234-efab-345678901002',
-    name: '変更予定日',
-    type: 'DATE',
-    required: true,
-    options: null,
-    order: 2,
-  },
-  {
-    id: 'e5f6a7b8-c9d0-1234-efab-345678901003',
-    name: '変更区分（4M）',
-    type: 'SELECT',
-    required: true,
-    options: ['Man（人）', 'Machine（設備）', 'Material（材料）', 'Method（方法）'],
-    order: 3,
-  },
-  {
-    id: 'e5f6a7b8-c9d0-1234-efab-345678901004',
-    name: '変更対象',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 4,
-  },
-  {
-    id: 'e5f6a7b8-c9d0-1234-efab-345678901005',
-    name: '変更前の状態',
-    type: 'TEXTAREA',
-    required: true,
-    options: null,
-    order: 5,
-  },
-  {
-    id: 'e5f6a7b8-c9d0-1234-efab-345678901006',
-    name: '変更後の状態',
-    type: 'TEXTAREA',
-    required: true,
-    options: null,
-    order: 6,
-  },
-  {
-    id: 'e5f6a7b8-c9d0-1234-efab-345678901007',
-    name: '変更理由',
-    type: 'TEXTAREA',
-    required: true,
-    options: null,
-    order: 7,
-  },
-  {
-    id: 'e5f6a7b8-c9d0-1234-efab-345678901008',
-    name: '品質への影響評価',
-    type: 'TEXTAREA',
-    required: true,
-    options: null,
-    order: 8,
-  },
-  {
-    id: 'e5f6a7b8-c9d0-1234-efab-345678901009',
-    name: 'リスクレベル',
-    type: 'SELECT',
-    required: true,
-    options: ['高', '中', '低'],
-    order: 9,
-  },
-  {
-    id: 'e5f6a7b8-c9d0-1234-efab-345678901010',
-    name: '確認試験・検証方法',
-    type: 'TEXTAREA',
-    required: false,
-    options: null,
-    order: 10,
-  },
-  {
-    id: 'e5f6a7b8-c9d0-1234-efab-345678901011',
-    name: '申請者名',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 11,
-  },
+const QUALITY_FIELDS: ThemeField[] = [
+  { id: 'tpl-quality-01', name: '発生日', type: 'DATE', required: true, options: null, order: 1 },
+  { id: 'tpl-quality-02', name: '製品名・品番', type: 'TEXT', required: true, options: null, order: 2 },
+  { id: 'tpl-quality-03', name: '不良内容', type: 'TEXTAREA', required: true, options: null, order: 3 },
+  { id: 'tpl-quality-04', name: '推定原因', type: 'TEXTAREA', required: true, options: null, order: 4 },
+  { id: 'tpl-quality-05', name: '対策', type: 'TEXTAREA', required: true, options: null, order: 5 },
+  { id: 'tpl-quality-06', name: '報告者名', type: 'TEXT', required: true, options: null, order: 6 },
 ]
-
-// ---- 設備日常点検記録 ----
-
-const DAILY_INSPECTION_FIELDS: ThemeField[] = [
-  {
-    id: 'f6a7b8c9-d0e1-2345-fabc-456789012001',
-    name: '点検日',
-    type: 'DATE',
-    required: true,
-    options: null,
-    order: 1,
-  },
-  {
-    id: 'f6a7b8c9-d0e1-2345-fabc-456789012002',
-    name: '点検時刻',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 2,
-  },
-  {
-    id: 'f6a7b8c9-d0e1-2345-fabc-456789012003',
-    name: '設備名',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 3,
-  },
-  {
-    id: 'f6a7b8c9-d0e1-2345-fabc-456789012004',
-    name: '点検区分',
-    type: 'SELECT',
-    required: true,
-    options: ['始業前点検', '終業後点検', '定期点検', '臨時点検'],
-    order: 4,
-  },
-  {
-    id: 'f6a7b8c9-d0e1-2345-fabc-456789012005',
-    name: '外観・油漏れ・異音',
-    type: 'SELECT',
-    required: true,
-    options: ['異常なし', '要注意', '異常あり'],
-    order: 5,
-  },
-  {
-    id: 'f6a7b8c9-d0e1-2345-fabc-456789012006',
-    name: '潤滑油・油量',
-    type: 'SELECT',
-    required: true,
-    options: ['正常', '補充要', '交換要', '対象外'],
-    order: 6,
-  },
-  {
-    id: 'f6a7b8c9-d0e1-2345-fabc-456789012007',
-    name: '安全装置・インターロック',
-    type: 'SELECT',
-    required: true,
-    options: ['正常', '要確認', '異常', '対象外'],
-    order: 7,
-  },
-  {
-    id: 'f6a7b8c9-d0e1-2345-fabc-456789012008',
-    name: '清掃状態',
-    type: 'SELECT',
-    required: true,
-    options: ['良好', '要清掃', '対象外'],
-    order: 8,
-  },
-  {
-    id: 'f6a7b8c9-d0e1-2345-fabc-456789012009',
-    name: '異常内容・特記事項',
-    type: 'TEXTAREA',
-    required: false,
-    options: null,
-    order: 9,
-  },
-  {
-    id: 'f6a7b8c9-d0e1-2345-fabc-456789012010',
-    name: '点検者名',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 10,
-  },
-]
-
-// ---- ヒヤリハット報告 ----
 
 const NEAR_MISS_FIELDS: ThemeField[] = [
-  {
-    id: 'a7b8c9d0-e1f2-3456-abcd-567890123001',
-    name: '発生日時',
-    type: 'DATETIME',
-    required: true,
-    options: null,
-    order: 1,
-  },
-  {
-    id: 'a7b8c9d0-e1f2-3456-abcd-567890123002',
-    name: '発生場所',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 2,
-  },
-  {
-    id: 'a7b8c9d0-e1f2-3456-abcd-567890123003',
-    name: '危険種別',
-    type: 'SELECT',
-    required: true,
-    options: ['転倒・転落', '挟まれ・巻き込まれ', '切れ・こすれ', '感電', '化学物質', '重量物', 'その他'],
-    order: 3,
-  },
-  {
-    id: 'a7b8c9d0-e1f2-3456-abcd-567890123004',
-    name: '被災可能性',
-    type: 'SELECT',
-    required: true,
-    options: ['高（重大災害に至る可能性あり）', '中（軽傷に至る可能性あり）', '低（ヒヤリのみ）'],
-    order: 4,
-  },
-  {
-    id: 'a7b8c9d0-e1f2-3456-abcd-567890123005',
-    name: '発生状況・経緯',
-    type: 'TEXTAREA',
-    required: true,
-    options: null,
-    order: 5,
-  },
-  {
-    id: 'a7b8c9d0-e1f2-3456-abcd-567890123006',
-    name: '原因（不安全行動・不安全状態）',
-    type: 'TEXTAREA',
-    required: true,
-    options: null,
-    order: 6,
-  },
-  {
-    id: 'a7b8c9d0-e1f2-3456-abcd-567890123007',
-    name: '再発防止策',
-    type: 'TEXTAREA',
-    required: true,
-    options: null,
-    order: 7,
-  },
-  {
-    id: 'a7b8c9d0-e1f2-3456-abcd-567890123008',
-    name: '対策実施期限',
-    type: 'DATE',
-    required: false,
-    options: null,
-    order: 8,
-  },
-  {
-    id: 'a7b8c9d0-e1f2-3456-abcd-567890123009',
-    name: '報告者名',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 9,
-  },
+  { id: 'tpl-near-01', name: '発生日時', type: 'DATETIME', required: true, options: null, order: 1 },
+  { id: 'tpl-near-02', name: '場所', type: 'TEXT', required: true, options: null, order: 2 },
+  { id: 'tpl-near-03', name: '発生状況', type: 'TEXTAREA', required: true, options: null, order: 3 },
+  { id: 'tpl-near-04', name: '原因', type: 'TEXTAREA', required: true, options: null, order: 4 },
+  { id: 'tpl-near-05', name: '再発防止策', type: 'TEXTAREA', required: true, options: null, order: 5 },
+  { id: 'tpl-near-06', name: '報告者名', type: 'TEXT', required: true, options: null, order: 6 },
 ]
 
-// ---- 生産日報 ----
-
-const PRODUCTION_REPORT_FIELDS: ThemeField[] = [
-  {
-    id: 'b8c9d0e1-f2a3-4567-bcde-678901234001',
-    name: '報告日',
-    type: 'DATE',
-    required: true,
-    options: null,
-    order: 1,
-  },
-  {
-    id: 'b8c9d0e1-f2a3-4567-bcde-678901234002',
-    name: 'ライン名・工程名',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 2,
-  },
-  {
-    id: 'b8c9d0e1-f2a3-4567-bcde-678901234003',
-    name: '製品名・品番',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 3,
-  },
-  {
-    id: 'b8c9d0e1-f2a3-4567-bcde-678901234004',
-    name: '計画数量',
-    type: 'NUMBER',
-    required: true,
-    options: null,
-    order: 4,
-  },
-  {
-    id: 'b8c9d0e1-f2a3-4567-bcde-678901234005',
-    name: '実績数量',
-    type: 'NUMBER',
-    required: true,
-    options: null,
-    order: 5,
-  },
-  {
-    id: 'b8c9d0e1-f2a3-4567-bcde-678901234006',
-    name: '不良数量',
-    type: 'NUMBER',
-    required: true,
-    options: null,
-    order: 6,
-  },
-  {
-    id: 'b8c9d0e1-f2a3-4567-bcde-678901234007',
-    name: '設備稼働率（%）',
-    type: 'NUMBER',
-    required: false,
-    options: null,
-    order: 7,
-  },
-  {
-    id: 'b8c9d0e1-f2a3-4567-bcde-678901234008',
-    name: '設備停止時間（分）',
-    type: 'NUMBER',
-    required: false,
-    options: null,
-    order: 8,
-  },
-  {
-    id: 'b8c9d0e1-f2a3-4567-bcde-678901234009',
-    name: '停止理由',
-    type: 'TEXTAREA',
-    required: false,
-    options: null,
-    order: 9,
-  },
-  {
-    id: 'b8c9d0e1-f2a3-4567-bcde-678901234010',
-    name: '特記事項・申し送り',
-    type: 'TEXTAREA',
-    required: false,
-    options: null,
-    order: 10,
-  },
-  {
-    id: 'b8c9d0e1-f2a3-4567-bcde-678901234011',
-    name: '報告者名',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 11,
-  },
-]
-
-// ---- 改善提案（カイゼン） ----
-
-const KAIZEN_FIELDS: ThemeField[] = [
-  {
-    id: 'c9d0e1f2-a3b4-5678-cdef-789012345001',
-    name: '提案日',
-    type: 'DATE',
-    required: true,
-    options: null,
-    order: 1,
-  },
-  {
-    id: 'c9d0e1f2-a3b4-5678-cdef-789012345002',
-    name: '対象工程・部署',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 2,
-  },
-  {
-    id: 'c9d0e1f2-a3b4-5678-cdef-789012345003',
-    name: '改善テーマ',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 3,
-  },
-  {
-    id: 'c9d0e1f2-a3b4-5678-cdef-789012345004',
-    name: '改善区分',
-    type: 'SELECT',
-    required: true,
-    options: ['安全', '品質', '生産性', 'コスト', '環境', '5S'],
-    order: 4,
-  },
-  {
-    id: 'c9d0e1f2-a3b4-5678-cdef-789012345005',
-    name: '現状の問題点',
-    type: 'TEXTAREA',
-    required: true,
-    options: null,
-    order: 5,
-  },
-  {
-    id: 'c9d0e1f2-a3b4-5678-cdef-789012345006',
-    name: '改善内容・アイデア',
-    type: 'TEXTAREA',
-    required: true,
-    options: null,
-    order: 6,
-  },
-  {
-    id: 'c9d0e1f2-a3b4-5678-cdef-789012345007',
-    name: '期待効果',
-    type: 'TEXTAREA',
-    required: true,
-    options: null,
-    order: 7,
-  },
-  {
-    id: 'c9d0e1f2-a3b4-5678-cdef-789012345008',
-    name: '難易度',
-    type: 'SELECT',
-    required: true,
-    options: ['すぐできる', '1ヶ月以内', '3ヶ月以内', '長期計画'],
-    order: 8,
-  },
-  {
-    id: 'c9d0e1f2-a3b4-5678-cdef-789012345009',
-    name: '提案者名',
-    type: 'TEXT',
-    required: true,
-    options: null,
-    order: 9,
-  },
-]
+// ============================================================
+// テンプレート一覧
+// ============================================================
 
 export const THEME_TEMPLATES: ThemeTemplate[] = [
+  // 汎用
+  {
+    id: 'template-memo',
+    name: 'メモ',
+    description: 'アイデアや情報をシンプルに記録するテンプレート。タイトル・内容・タグの3項目のみ。',
+    industry: '汎用',
+    icon: SerendieSymbolStickyNote,
+    fields: MEMO_FIELDS,
+  },
+  {
+    id: 'template-daily-report',
+    name: '日報',
+    description: '日々の業務を記録するテンプレート。やったこと・課題・明日の予定を簡潔に。',
+    industry: '汎用',
+    icon: SerendieSymbolArticle,
+    fields: DAILY_REPORT_FIELDS,
+  },
+  {
+    id: 'template-minutes',
+    name: '議事録',
+    description: '会議の記録用テンプレート。参加者・議題・決定事項・次アクションを管理。',
+    industry: '汎用',
+    icon: SerendieSymbolChatRectangle,
+    fields: MINUTES_FIELDS,
+  },
+  {
+    id: 'template-idea',
+    name: 'アイデア',
+    description: '思いついたアイデアを整理するテンプレート。カテゴリと優先度で分類可能。',
+    industry: '汎用',
+    icon: SerendieSymbolLightning,
+    fields: IDEA_FIELDS,
+  },
+  {
+    id: 'template-task',
+    name: 'タスク',
+    description: 'タスク管理用テンプレート。期限・優先度・ステータスで進捗を把握。',
+    industry: '汎用',
+    icon: SerendieSymbolCheckSquare,
+    fields: TASK_FIELDS,
+  },
+  // 製造業
   {
     id: 'template-equipment-trouble',
     name: '設備故障・トラブル報告',
-    description: '設備の故障やトラブル発生時の報告テンプレートです。発生状況・原因・対処内容・復旧状況を一元管理します。',
+    description: '設備の故障やトラブル発生時の報告テンプレート。発生状況・対処・復旧状況を管理。',
     industry: '製造業',
-    icon: '🔧',
+    icon: SerendieSymbolTool,
     fields: TROUBLE_FIELDS,
   },
   {
     id: 'template-quality-defect',
     name: '品質不良・不適合報告',
-    description: '製品の不良・不適合発生時の記録テンプレートです。なぜなぜ分析による原因究明と恒久対策までを管理します。',
+    description: '製品の不良・不適合を記録するテンプレート。原因分析と対策まで管理。',
     industry: '製造業',
-    icon: '🔍',
-    fields: QUALITY_DEFECT_FIELDS,
-  },
-  {
-    id: 'template-4m-change',
-    name: '4M変更管理記録',
-    description: '人・設備・材料・方法（4M）の変更を管理するテンプレートです。品質への影響評価とリスク管理を行います。',
-    industry: '製造業',
-    icon: '📋',
-    fields: CHANGE_MANAGEMENT_FIELDS,
-  },
-  {
-    id: 'template-daily-inspection',
-    name: '設備日常点検記録',
-    description: '設備の始業前・終業後・定期点検を記録するテンプレートです。外観・油量・安全装置など各点検項目を管理します。',
-    industry: '製造業',
-    icon: '✅',
-    fields: DAILY_INSPECTION_FIELDS,
+    icon: SerendieSymbolAlertCircle,
+    fields: QUALITY_FIELDS,
   },
   {
     id: 'template-near-miss',
     name: 'ヒヤリハット報告',
-    description: 'ヒヤリハット・危険予知事例の報告テンプレートです。発生状況・原因・再発防止策を記録し安全文化を醸成します。',
+    description: 'ヒヤリハット・危険予知事例の報告テンプレート。再発防止策の記録で安全文化を醸成。',
     industry: '製造業',
-    icon: '⚠️',
+    icon: SerendieSymbolAlertTriangle,
     fields: NEAR_MISS_FIELDS,
-  },
-  {
-    id: 'template-production-report',
-    name: '生産日報',
-    description: '日々の生産実績を記録するテンプレートです。計画対実績・不良数・設備稼働率・停止理由を一元管理します。',
-    industry: '製造業',
-    icon: '📊',
-    fields: PRODUCTION_REPORT_FIELDS,
-  },
-  {
-    id: 'template-kaizen',
-    name: '改善提案（カイゼン）',
-    description: '現場からの改善アイデアを記録・管理するテンプレートです。安全・品質・生産性・コストの改善活動を推進します。',
-    industry: '製造業',
-    icon: '💡',
-    fields: KAIZEN_FIELDS,
   },
 ]
 

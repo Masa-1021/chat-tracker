@@ -109,7 +109,7 @@ export function ThemeForm() {
       {appliedTemplate && (
         <div className="template-applied-banner">
           <span className="template-applied-icon" aria-hidden="true">
-            {appliedTemplate.icon}
+            <appliedTemplate.icon width={20} height={20} />
           </span>
           <span>
             テンプレート「{appliedTemplate.name}」を適用中。フィールドは自由に編集できます。
