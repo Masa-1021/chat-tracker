@@ -1,4 +1,4 @@
-import type { SavedData, Theme } from '@/types'
+import type { SavedData, Theme, User } from '@/types'
 
 /**
  * Escape a single CSV field value per RFC 4180:
@@ -57,28 +57,32 @@ function formatDatetime(iso: string): string {
  * Export SavedData records to a CSV file and trigger a browser download.
  *
  * Columns:
- *   ID, タイトル, テーマ名, [dynamic theme field names...], 作成者, 作成日時, 更新日時
+ *   タイトル, テーマ名, [dynamic theme field names...], 作成者, 作成日時, 更新日時
  *
  * - BOM (\uFEFF) is prepended for Excel Japanese compatibility.
  * - All field values are properly escaped per RFC 4180.
  * - For data that spans multiple themes, all field names are unioned in order of first appearance.
+ * - 作成者 is displayed as the user's email address (fallback: displayName, then original ID).
  *
  * @param data         - Array of SavedData to export
  * @param themes       - Array of Theme objects (used to resolve field definitions)
+ * @param users        - Array of User objects (used to resolve createdBy ID to email)
  * @param filename     - Optional download filename (defaults to "export-YYYY-MM-DD.csv")
  * @param onExported   - Optional callback invoked after the download is triggered (used for audit logging)
  */
 export function exportToCsv(
   data: SavedData[],
   themes: Theme[],
+  users: User[],
   filename?: string,
   onExported?: () => void,
 ): void {
   const themeMap = new Map<string, Theme>(themes.map((t) => [t.id, t]))
+  const userMap = new Map<string, User>(users.map((u) => [u.id, u]))
   const fieldNames = collectFieldNames(data, themes)
 
   // Build header row
-  const fixedHeaders = ['ID', 'タイトル', 'テーマ名']
+  const fixedHeaders = ['タイトル', 'テーマ名']
   const fixedTailHeaders = ['作成者', '作成日時', '更新日時']
   const headers = [...fixedHeaders, ...fieldNames, ...fixedTailHeaders]
   const headerRow = headers.map(escapeCsvField).join(',')
@@ -87,8 +91,10 @@ export function exportToCsv(
   const rows = data.map((item) => {
     const theme = themeMap.get(item.themeId)
     const themeName = theme ? theme.name : item.themeId
+    const user = userMap.get(item.createdBy)
+    const createdByDisplay = user?.email ?? user?.displayName ?? item.createdBy
 
-    const fixedCells = [item.id, item.title, themeName]
+    const fixedCells = [item.title, themeName]
 
     const dynamicCells = fieldNames.map((fieldName) => {
       const val = item.content[fieldName]
@@ -96,7 +102,7 @@ export function exportToCsv(
     })
 
     const tailCells = [
-      item.createdBy,
+      createdByDisplay,
       formatDatetime(item.createdAt),
       formatDatetime(item.updatedAt),
     ]

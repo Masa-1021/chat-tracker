@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useSavedDataList, useDeleteSavedData } from '../hooks/useData'
 import { useThemeList } from '@/features/theme/hooks/useTheme'
+import { useUserList } from '@/features/admin/hooks/useAdmin'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { isAdminRole } from '@/shared/utils/permissions'
 import { DataCard } from './DataCard'
@@ -21,6 +22,7 @@ export function DataList() {
   const filters = themeFilter ? { themeId: themeFilter } : undefined
   const { data: items, isLoading } = useSavedDataList(filters)
   const { data: themes } = useThemeList()
+  const { data: users } = useUserList()
   const deleteSavedData = useDeleteSavedData()
 
   const filtered = useMemo(() => {
@@ -69,7 +71,7 @@ export function DataList() {
         <button
           type="button"
           className="data-export-btn"
-          onClick={() => exportToCsv(filtered, themes ?? [])}
+          onClick={() => exportToCsv(filtered, themes ?? [], users ?? [])}
           disabled={filtered.length === 0}
           aria-label="表示中のデータをCSV形式でエクスポート"
         >

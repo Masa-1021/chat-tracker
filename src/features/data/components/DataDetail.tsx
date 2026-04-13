@@ -6,11 +6,14 @@ import {
   useDeleteSavedData,
   useEditHistory,
 } from '../hooks/useData'
+import { useThemeList } from '@/features/theme/hooks/useTheme'
+import { useUserList } from '@/features/admin/hooks/useAdmin'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { isAdminRole } from '@/shared/utils/permissions'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { renderMarkdown } from '@/shared/utils/markdown'
 import { formatRelativeTime } from '@/shared/utils/date'
+import { exportToCsv } from '../utils/exportCsv'
 import { EditHistoryTimeline } from './EditHistoryTimeline'
 
 export function DataDetail() {
@@ -20,6 +23,8 @@ export function DataDetail() {
 
   const { data, isLoading } = useSavedDataById(id)
   const { data: history } = useEditHistory(id)
+  const { data: themes } = useThemeList()
+  const { data: users } = useUserList()
   const deleteSavedData = useDeleteSavedData()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
@@ -31,6 +36,13 @@ export function DataDetail() {
     if (!id) return
     await deleteSavedData.mutateAsync(id)
     navigate('/data', { replace: true })
+  }
+
+  const handleExportCsv = () => {
+    if (!data) return
+    const safeTitle = data.title.replace(/[\\/:*?"<>|]/g, '_').slice(0, 50)
+    const today = new Date().toISOString().slice(0, 10)
+    exportToCsv([data], themes ?? [], users ?? [], `${safeTitle}-${today}.csv`)
   }
 
   if (isLoading) {
@@ -52,6 +64,13 @@ export function DataDetail() {
             onClick={() => setShowHistory((v) => !v)}
           >
             {showHistory ? '詳細に戻る' : '編集履歴'}
+          </Button>
+          <Button
+            styleType="outlined"
+            size="small"
+            onClick={handleExportCsv}
+          >
+            CSVダウンロード
           </Button>
           <Button
             styleType="outlined"
